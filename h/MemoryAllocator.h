@@ -5,8 +5,6 @@
 #ifndef OS1_PROJEKAT_MEMORYALLOCATOR_H
 #define OS1_PROJEKAT_MEMORYALLOCATOR_H
 #include"../lib/hw.h"
-extern const void* HEAP_START_ADDR, HEAP_END_ADDR;
-extern const size_t MEM_BLOCK_SIZE;
 #define MINTSIZE 32
 #define MMDSIZE 64
 struct MMD

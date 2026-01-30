@@ -77,18 +77,18 @@ OBJECTS =
 # Define which main file to use (default: main.c, for tests: test1.cpp, test2.cpp, etc.)
 MAIN_SRC ?= src/main.c
 
-SOURCES_ASM = $(shell find . -name "*.S" -printf "%P ")
+SOURCES_ASM = $(shell find . -name "*.S" -printf "%P\n")
 OBJECTS += $(addprefix ${DIR_BUILD}/,${SOURCES_ASM:.S=.o})
 vpath %.S $(sort $(dir ${SOURCES_ASM}))
 
-SOURCES = $(shell find . -name "*.c" -printf "%P " | grep -v -e "src/main.c" -e "src/test.*\.c")
+SOURCES = $(shell find . -name "*.c" -printf "%P\n" | grep -v -e "src/main.c" -e "src/test.*\.c")
 ifeq ($(suffix ${MAIN_SRC}),.c)
 SOURCES += ${MAIN_SRC}
 endif
 OBJECTS += $(addprefix ${DIR_BUILD}/,${SOURCES:.c=.o})
 vpath %.c $(sort $(dir ${SOURCES}))
 
-SOURCES_CPP = $(shell find . -name "*.cpp" -printf "%P " | grep -v "src/test.*\.cpp")
+SOURCES_CPP = $(shell find . -name "*.cpp" -printf "%P\n" | grep -v "src/test.*\.cpp")
 ifeq ($(suffix ${MAIN_SRC}),.cpp)
 SOURCES_CPP += ${MAIN_SRC}
 endif
