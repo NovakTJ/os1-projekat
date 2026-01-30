@@ -14,7 +14,7 @@ MMD* MMD::next()
 MMD::MMD(uint32 s, MMD* n)
 {
     size = s;
-    nextBID = MemoryAllocator::getBID(n);
+    nextBID = MemoryAllocator::getBID((char*)n);
 }
 
 // MemoryAllocator member function implementations
@@ -30,14 +30,18 @@ char* MemoryAllocator::getAdd(uint32 bid)
 
 void MemoryAllocator::init()
 {
-    startAddr = (char*)(((size_t)HEAP_START_ADDR + MMDSIZE) / MEM_BLOCK_SIZE + 1) * MEM_BLOCK_SIZE;
-    endAddr = (char*)((size_t)HEAP_END_ADDR / MEM_BLOCK_SIZE) * MEM_BLOCK_SIZE;
+    startAddr = (char*)((((size_t)HEAP_START_ADDR +MMDSIZE) / MEM_BLOCK_SIZE + 1) * MEM_BLOCK_SIZE);
+    char* bBlockAddr = startAddr + MEM_BLOCK_SIZE;
+    char* aBlockAddr = startAddr;
+    endAddr = (char*)((size_t)HEAP_END_ADDR / MEM_BLOCK_SIZE * MEM_BLOCK_SIZE);
     iteratorAddress = (MMD*)(startAddr - MMDSIZE);
 
     *iteratorAddress = MMD(
         (endAddr - startAddr) / MEM_BLOCK_SIZE,
         iteratorAddress
     );
+
+    totalAvailableMemory = endAddr - startAddr;
 }
 
 char* MemoryAllocator::allocate(size_t nBlocks)
@@ -46,7 +50,7 @@ char* MemoryAllocator::allocate(size_t nBlocks)
     return nullptr;
 }
 
-void MemoryAllocator::deallocate(char* address)
+int MemoryAllocator::deallocate(char* address)
 {
     // TODO: Implement deallocation logic
 }

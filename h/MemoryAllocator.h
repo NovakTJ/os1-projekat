@@ -18,7 +18,7 @@ class MemoryAllocator
 {
     public:
     static char* allocate(size_t nBlocks);
-    static void deallocate(char* address);
+    static int deallocate(char* address);
 
     static char* startAddr;
     static char* endAddr;
