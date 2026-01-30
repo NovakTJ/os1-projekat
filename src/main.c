@@ -4,6 +4,10 @@
 #include"../lib/console.h"
 void main()
 {
-    char x = __getc();
-    __putc(x);
+    char x;
+    while (1)
+    {
+        x = __getc();
+        __putc(x);
+    }
 }
