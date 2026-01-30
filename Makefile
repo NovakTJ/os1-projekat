@@ -74,15 +74,24 @@ LDLIBS   = --library-path . $(patsubst %,--library=:%,${LIBS})
 
 OBJECTS =
 
+# Define which main file to use (default: main.c, for tests: test1.cpp, test2.cpp, etc.)
+MAIN_SRC ?= src/main.c
+
 SOURCES_ASM = $(shell find . -name "*.S" -printf "%P ")
 OBJECTS += $(addprefix ${DIR_BUILD}/,${SOURCES_ASM:.S=.o})
 vpath %.S $(sort $(dir ${SOURCES_ASM}))
 
-SOURCES = $(shell find . -name "*.c" -printf "%P ")
+SOURCES = $(shell find . -name "*.c" -printf "%P " | grep -v -e "src/main.c" -e "src/test.*\.c")
+ifeq ($(suffix ${MAIN_SRC}),.c)
+SOURCES += ${MAIN_SRC}
+endif
 OBJECTS += $(addprefix ${DIR_BUILD}/,${SOURCES:.c=.o})
 vpath %.c $(sort $(dir ${SOURCES}))
 
-SOURCES_CPP = $(shell find . -name "*.cpp" -printf "%P ")
+SOURCES_CPP = $(shell find . -name "*.cpp" -printf "%P " | grep -v "src/test.*\.cpp")
+ifeq ($(suffix ${MAIN_SRC}),.cpp)
+SOURCES_CPP += ${MAIN_SRC}
+endif
 OBJECTS += $(addprefix ${DIR_BUILD}/,${SOURCES_CPP:.cpp=.o})
 vpath %.cpp $(sort $(dir ${SOURCES_CPP}))
 
@@ -132,6 +141,15 @@ qemu: ${KERNEL_IMG}
 qemu-gdb: ${KERNEL_IMG} .gdbinit
 	@echo "*** Now run 'gdb-multiarch' in another window with target remote args 'localhost:${GDBPORT}'." 1>&2
 	${QEMU} ${QEMUOPTS} -S ${QEMUGDB}
+
+# Test targets
+test1: clean
+	@$(MAKE) MAIN_SRC=src/test1.cpp KERNEL_IMG=kernel-test1 all
+	@mv kernel-test1 kernel
+	@echo "*** Built test1 (kernel-test1) ***"
+
+qemu-test1: test1
+	${QEMU} ${QEMUOPTS}
 
 # Prevent deletion of intermediate files, e.g. cat.o, after first build, so
 # that disk image changes after first build are persistent until clean.
