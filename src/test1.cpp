@@ -13,7 +13,14 @@ void main()
     __putc('\n');
 
     MemoryAllocator::init();
-
+    char* ptr = MemoryAllocator::allocate(3);
+    MemoryAllocator::deallocate(ptr);
+    char* ptr2 = MemoryAllocator::allocate(3);
+    ptr = MemoryAllocator::allocate(3);
+    MemoryAllocator::deallocate(ptr);
+    ptr = MemoryAllocator::allocate(3);
+    MemoryAllocator::deallocate(ptr);
+    MemoryAllocator::deallocate(ptr2);
     __putc('D');
     __putc('o');
     __putc('n');

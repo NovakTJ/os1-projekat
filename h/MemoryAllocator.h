@@ -5,28 +5,44 @@
 #ifndef OS1_PROJEKAT_MEMORYALLOCATOR_H
 #define OS1_PROJEKAT_MEMORYALLOCATOR_H
 #include"../lib/hw.h"
-#define MINTSIZE 32
-#define MMDSIZE 64
 struct MMD
 {
-    uint32 size;
+    uint32 size; //number of blocks, including the next metadata.
     uint32 nextBID;
-    MMD* next();
+    MMD* getNext(); //nextAddr()
+    void setNext(MMD* a); //nextAddr()
     MMD(uint32 s, MMD* n);
+    bool isAllocated();
+    void setAllocated(bool a);
 };
 class MemoryAllocator
 {
     public:
+    static bool initialized;
     static char* allocate(size_t nBlocks);
     static int deallocate(char* address);
 
     static char* startAddr;
     static char* endAddr;
     static MMD* iteratorAddress;
+    static uint32 totalAvailableBlocks;
+    static size_t totalAvailableBytes();
 
     static uint32 getBID(char* address);
     static char* getAdd(uint32 bid);
+    static size_t MMDSIZE;
     static void init();
+private:
+    //terminology:
+    //slab is the name for the contiguous space of memory that is one element in the list
+    static bool canMerge(MMD* mmd);
+    static void merge(MMD* mmd);
+    static bool slabGood(MMD* mmd, size_t size);
+    static bool slabMoreThanGood(MMD* mmd, size_t size);
+    static MMD* MaybeCreateAndReturnNextMMD(MMD* mmd, size_t nBlocks);
+    static MMD* createFirstTwoSlabs();
+    static uint32 listSize;
+
 };
 
 #endif //OS1_PROJEKAT_MEMORYALLOCATOR_H
