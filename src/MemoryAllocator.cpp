@@ -2,6 +2,11 @@
 #include"../h/print.hpp"
 #include"../lib/mem.h"
 
+// Known bugs:
+// - totalAvailableBlocks may underflow under extreme stress (unsigned wrap)
+// - Failed allocation can cause a kernel trap instead of returning nullptr;
+//   usually because callers don't null-check the return value, not this code
+
 // Static member definitions
 char* MemoryAllocator::startAddr = nullptr;
 char* MemoryAllocator::endAddr = nullptr;
@@ -20,13 +25,17 @@ size_t MemoryAllocator::MMDSIZE = 8;
 void* __mem_alloc(size_t size)
 {
     //TODO: this is not a system call and it should be. call ::allocate from stvec. here just li a0 and ecall.
-    return (void*)MemoryAllocator::allocate(size);
+    void* rtn =  (void*)MemoryAllocator::allocate(size);
+    // MemoryAllocator::printInfo();
+    return rtn;
 }
 
 int __mem_free(void* ptr)
 {
     //TODO: this is not a system call and it should be. call ::deallocate from stvec. here just li a0 and ecall.
-    return MemoryAllocator::deallocate((char*)ptr);
+    int x = MemoryAllocator::deallocate((char*)ptr);
+    // MemoryAllocator::printInfo();
+    return x;
 }
 
 
@@ -93,9 +102,8 @@ void MemoryAllocator::init()
 bool MemoryAllocator::canMerge(MMD* mmd)
 {
     if (mmd->size == 0) return false;
-    char* aboveAddr = (char*)mmd + mmd->size * MEM_BLOCK_SIZE;
-    if (aboveAddr >= endAddr) return false;
-    MMD* aboveMmd = (MMD*)aboveAddr;
+    MMD* aboveMmd = (MMD*)((char*)mmd + mmd->size * MEM_BLOCK_SIZE);
+    if ((char*)(aboveMmd + 1) >= endAddr) return false;
     if (aboveMmd->size == 0) return false;
     return !aboveMmd->isAllocated();
 }
@@ -146,7 +154,6 @@ MMD* MemoryAllocator::MaybeCreateAndReturnNextMMD(MMD* wholeSlabMMD, size_t nByt
 
     if (slabMoreThanGood(wholeSlabMMD, nBytes))
     {
-        wholeSlabMMD->size = neededBlocks(nBytes);
         MMD* smallMMD = (MMD*)(
             (char*)wholeSlabMMD+neededBlocks(nBytes)*MEM_BLOCK_SIZE
         );
@@ -154,6 +161,7 @@ MMD* MemoryAllocator::MaybeCreateAndReturnNextMMD(MMD* wholeSlabMMD, size_t nByt
         wholeSlabMMD->size - neededBlocks(nBytes),
         wholeSlabMMD->getNext()
         );
+        wholeSlabMMD->size = neededBlocks(nBytes);
         return smallMMD;
     }
     else
@@ -222,11 +230,11 @@ char* MemoryAllocator::allocate(size_t nBytes)
 void MemoryAllocator::printInfo()
 {
     printString("=== MemoryAllocator Info ===\n");
-    printString("startAddr: "); printInteger((uint64)startAddr); printString("\n");
-    printString("endAddr:   "); printInteger((uint64)endAddr); printString("\n");
+    printString("startAddr: "); printHexInteger((uint64)startAddr); printString("\n");
+    printString("endAddr:   "); printHexInteger((uint64)endAddr); printString("\n");
     printString("total blocks: "); printInteger((uint64)((endAddr - startAddr) / MEM_BLOCK_SIZE)); printString("\n");
     printString("free blocks:  "); printInteger(totalAvailableBlocks); printString("\n");
-    printString("free bytes:   "); printInteger(totalAvailableBytes()); printString("\n");
+    printString("free bytes:   "); printHexInteger(totalAvailableBytes()); printString("\n");
     printString("free list size: "); printInteger(listSize); printString("\n");
 
     printString("--- Free list slabs ---\n");
@@ -236,9 +244,9 @@ void MemoryAllocator::printInfo()
     do
     {
         printString("  ["); printInteger(i); printString("] addr=");
-        printInteger((uint64)cur);
+        printHexInteger((uint64)cur);
         printString(" size="); printInteger(cur->size);
-        printString(" blocks ("); printInteger((uint64)cur->size * MEM_BLOCK_SIZE); printString(" bytes)\n");
+        printString(" blocks ("); printHexInteger((uint64)cur->size * MEM_BLOCK_SIZE); printString(" bytes)\n");
         cur = cur->getNext();
         i++;
     } while (cur != start);
