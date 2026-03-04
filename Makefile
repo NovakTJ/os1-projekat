@@ -9,8 +9,8 @@ KERNEL_ASM = kernel.asm
 
 LIBS = \
   ${DIR_LIBS}/hw.lib \
-  ${DIR_LIBS}/mem.lib \
   ${DIR_LIBS}/console.lib
+# NOTE: mem.lib removed - our MemoryAllocator manages the heap directly, mem.lib conflicts with it
 
 # riscv64-unknown-elf- or riscv64-linux-gnu-
 # perhaps in /opt/riscv/bin
@@ -75,7 +75,7 @@ LDLIBS   = --library-path . $(patsubst %,--library=:%,${LIBS})
 OBJECTS =
 
 # Define which main file to use (default: main.c, for tests: test1.cpp, test2.cpp, etc.)
-MAIN_SRC ?= src/main.c
+MAIN_SRC ?= src/main.cpp
 
 SOURCES_ASM = $(shell find . -name "*.S" -printf "%P\n")
 OBJECTS += $(addprefix ${DIR_BUILD}/,${SOURCES_ASM:.S=.o})
@@ -88,7 +88,7 @@ endif
 OBJECTS += $(addprefix ${DIR_BUILD}/,${SOURCES:.c=.o})
 vpath %.c $(sort $(dir ${SOURCES}))
 
-SOURCES_CPP = $(shell find . -name "*.cpp" -printf "%P\n" | grep -v "src/test.*\.cpp")
+SOURCES_CPP = $(shell find . -name "*.cpp" -printf "%P\n" | grep -v -e "src/test.*\.cpp" -e "src/main\.cpp")
 ifeq ($(suffix ${MAIN_SRC}),.cpp)
 SOURCES_CPP += ${MAIN_SRC}
 endif

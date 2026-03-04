@@ -5,6 +5,9 @@
 #ifndef OS1_PROJEKAT_MEMORYALLOCATOR_H
 #define OS1_PROJEKAT_MEMORYALLOCATOR_H
 #include"../lib/hw.h"
+
+
+
 struct MMD
 {
     uint32 size; //number of blocks, including the next metadata.
@@ -32,6 +35,7 @@ class MemoryAllocator
     static char* getAdd(uint32 bid);
     static size_t MMDSIZE;
     static void init();
+    static void printInfo();
 private:
     //terminology:
     //slab is the name for the contiguous space of memory that is one element in the list

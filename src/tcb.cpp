@@ -30,8 +30,8 @@ void TCB::dispatch()
 
 void TCB::threadWrapper()
 {
-    Riscv::popSppSpie();
-    running->body();
+    Riscv::popSppSpie(); //brings down the priv level with sret black magic
+    running->body(); //does the fn
     running->setFinished(true);
     TCB::yield();
 }

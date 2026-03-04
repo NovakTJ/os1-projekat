@@ -1,4 +1,6 @@
 #include"../h/MemoryAllocator.h"
+#include"../h/print.hpp"
+#include"../lib/mem.h"
 
 // Static member definitions
 char* MemoryAllocator::startAddr = nullptr;
@@ -15,26 +17,39 @@ size_t MemoryAllocator::totalAvailableBytes()
 
 size_t MemoryAllocator::MMDSIZE = 8;
 
+void* __mem_alloc(size_t size)
+{
+    //TODO: this is not a system call and it should be. call ::allocate from stvec. here just li a0 and ecall.
+    return (void*)MemoryAllocator::allocate(size);
+}
+
+int __mem_free(void* ptr)
+{
+    //TODO: this is not a system call and it should be. call ::deallocate from stvec. here just li a0 and ecall.
+    return MemoryAllocator::deallocate((char*)ptr);
+}
+
+
 // MMD member function implementations
 MMD* MMD::getNext()
 {
-    return (MMD*)MemoryAllocator::getAdd(nextBID);
+    return (MMD*)MemoryAllocator::getAdd(nextBID) - 1;
 }
 
 void MMD::setNext(MMD* a)
 {
-    nextBID = MemoryAllocator::getBID((char*)a);
+    nextBID = MemoryAllocator::getBID((char*)(a+1));
 }
 
 MMD::MMD(uint32 s, MMD* n)
 {
     size = s;
-    nextBID = MemoryAllocator::getBID((char*)n);
+    setNext(n);
 }
 
 bool MMD::isAllocated()
 {
-    return nextBID < (uint32)(-1);
+    return nextBID == (uint32)(-1);
 }
 
 void MMD::setAllocated(bool a)
@@ -77,13 +92,27 @@ void MemoryAllocator::init()
 
 bool MemoryAllocator::canMerge(MMD* mmd)
 {
-    return 0; //placeholder, no merging yet. low priority. claude can do it later
+    if (mmd->size == 0) return false;
+    char* aboveAddr = (char*)mmd + mmd->size * MEM_BLOCK_SIZE;
+    if (aboveAddr >= endAddr) return false;
+    MMD* aboveMmd = (MMD*)aboveAddr;
+    if (aboveMmd->size == 0) return false;
+    return !aboveMmd->isAllocated();
 }
 
 void MemoryAllocator::merge(MMD* mmd)
 {
-    //for the disappearing slab its important to find the previous element and update it. O(N) is ok.
-    ;
+    MMD* aboveMmd = (MMD*)((char*)mmd + mmd->size * MEM_BLOCK_SIZE);
+    // Remove aboveMmd from the free list by finding its predecessor
+    MMD* prev = mmd;
+    while (prev->getNext() != aboveMmd)
+    {
+        prev = prev->getNext();
+    }
+    prev->setNext(aboveMmd->getNext());
+    // Absorb aboveMmd's blocks into mmd
+    mmd->size += aboveMmd->size;
+    listSize--;
 }
 
 uint32 neededBlocks(size_t nBytes)
@@ -117,6 +146,7 @@ MMD* MemoryAllocator::MaybeCreateAndReturnNextMMD(MMD* wholeSlabMMD, size_t nByt
 
     if (slabMoreThanGood(wholeSlabMMD, nBytes))
     {
+        wholeSlabMMD->size = neededBlocks(nBytes);
         MMD* smallMMD = (MMD*)(
             (char*)wholeSlabMMD+neededBlocks(nBytes)*MEM_BLOCK_SIZE
         );
@@ -162,7 +192,7 @@ char* MemoryAllocator::allocate(size_t nBytes)
     bool secondTry = false;
     while (1)
     {
-        if (cmmd==firstIteratorAddress && secondTry) return nullptr;
+        if (cmmd==firstIteratorAddress && secondTry) { printInfo(); return nullptr; }
         if (cmmd==firstIteratorAddress) secondTry = true;
         //the second try is because maybe a merge is available. but prob not.
 
@@ -181,13 +211,39 @@ char* MemoryAllocator::allocate(size_t nBytes)
             cmmd=nullptr;
             while (canMerge(iteratorAddress))
             {
-                break;
                 merge(iteratorAddress); //merge with slab above;
             }
         }
         iteratorAddress = iteratorAddress->getNext();
         cmmd = iteratorAddress->getNext();
     }
+}
+
+void MemoryAllocator::printInfo()
+{
+    printString("=== MemoryAllocator Info ===\n");
+    printString("startAddr: "); printInteger((uint64)startAddr); printString("\n");
+    printString("endAddr:   "); printInteger((uint64)endAddr); printString("\n");
+    printString("total blocks: "); printInteger((uint64)((endAddr - startAddr) / MEM_BLOCK_SIZE)); printString("\n");
+    printString("free blocks:  "); printInteger(totalAvailableBlocks); printString("\n");
+    printString("free bytes:   "); printInteger(totalAvailableBytes()); printString("\n");
+    printString("free list size: "); printInteger(listSize); printString("\n");
+
+    printString("--- Free list slabs ---\n");
+    MMD* start = iteratorAddress;
+    MMD* cur = start;
+    uint32 i = 0;
+    do
+    {
+        printString("  ["); printInteger(i); printString("] addr=");
+        printInteger((uint64)cur);
+        printString(" size="); printInteger(cur->size);
+        printString(" blocks ("); printInteger((uint64)cur->size * MEM_BLOCK_SIZE); printString(" bytes)\n");
+        cur = cur->getNext();
+        i++;
+    } while (cur != start);
+
+    printString("===========================\n");
 }
 
 int MemoryAllocator::deallocate(char* address)

@@ -12,7 +12,12 @@ void main()
     __putc('t');
     __putc('\n');
 
-    MemoryAllocator::init();
+    MemoryAllocator::init();    __putc('D');
+    __putc('o');
+    __putc('n');
+    __putc('e');
+    __putc('\n');
+
     char* ptr = MemoryAllocator::allocate(3);
     MemoryAllocator::deallocate(ptr);
     char* ptr2 = MemoryAllocator::allocate(3);
@@ -21,11 +26,6 @@ void main()
     ptr = MemoryAllocator::allocate(3);
     MemoryAllocator::deallocate(ptr);
     MemoryAllocator::deallocate(ptr2);
-    __putc('D');
-    __putc('o');
-    __putc('n');
-    __putc('e');
-    __putc('\n');
-
+__putc('!');
     while(1);  // Halt
 }
