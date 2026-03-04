@@ -5,6 +5,9 @@
 #include "../h/tcb.hpp"
 #include "../h/riscv.hpp"
 
+
+//TODO: we know that a thread created in usermode creates usermode threads. make sure that threads created in kernelmode are usermode threads too. check where Riscv::mc_SPP is called.
+
 TCB *TCB::running = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
@@ -16,11 +19,14 @@ TCB *TCB::createThread(Body body)
 
 void TCB::yield()
 {
-    __asm__ volatile ("ecall");
+    //TODO: this is compatible with uros's code. not sure if its compatible w the final code. it is if the required thread_dispatch syscall calls this function.
+    //in Uros's code this function is called only from superviser mode and not from usermain() im 80% sure. but it should work even if it's called from user mode becaue it elevates.
+    Riscv::ecall(0x13);
 }
 
-void TCB::dispatch()
+void TCB::urosDispatch()
 {
+    //This is called by the kernel I think - not by usermode theread_dispathc, - the naming is unfortunate.
     TCB *old = running;
     if (!old->isFinished()) { Scheduler::put(old); }
     running = Scheduler::get();

@@ -5,7 +5,10 @@
 #include "../h/riscv.hpp"
 #include "../h/tcb.hpp"
 #include "../lib/console.h"
+#include "../h/MemoryAllocator.h"
 
+
+//TODO: ctrl replace MemoryAllocator.h with .hpp everywhere and rename the file too
 void Riscv::popSppSpie()
 {
     __asm__ volatile("csrw sepc, ra"); //???
@@ -17,11 +20,48 @@ void Riscv::handleSupervisorTrap()
     uint64 scause = r_scause();
     if (scause == 0x0000000000000008UL || scause == 0x0000000000000009UL)
     {
+
         // interrupt: no; cause code: environment call from U-mode(8) or S-mode(9)
+        //TODO: write a long switch
+        bool hasReturnValue = true;
+        uint64 volatile opcode;
+        uint64 volatile arg1;
+        uint64 volatile arg2;
+        uint64 volatile arg3;
+        uint64 volatile syscallReturnValue;
+        __asm__ volatile("ld %0, 80(sp)" : "=r"(opcode));
+        __asm__ volatile("ld %0, 88(sp)" : "=r"(arg1));
+        __asm__ volatile("ld %0, 96(sp)" : "=r"(arg2));
+        __asm__ volatile("ld %0, 104(sp)" : "=r"(arg3));
+
+        switch (opcode)
+        {
+
+        case 0x01:
+            syscallReturnValue = (uint64)MemoryAllocator::allocate(arg1);
+            break;
+        case 0x02:
+            syscallReturnValue = (uint64)MemoryAllocator::deallocate((char*)arg1);
+            break;
+        case 0x03:
+            syscallReturnValue = (uint64)MemoryAllocator::totalAvailableBytes();
+            break;
+        case 0x04:
+            //TODO: implemet the following: syscallReturnValue = (uint64)MemoryAllocator::largestAvailableBlock();
+            break;
+        case 0x13:
+            //uros yield / spec thread_dispatch - do nothing
+
+            hasReturnValue = false;
+            break; }
+        if (hasReturnValue)
+        {
+            __asm__ volatile("sd %0, 80(sp)" : : "r"(syscallReturnValue));
+        }
         uint64 volatile sepc = r_sepc() + 4;
         uint64 volatile sstatus = r_sstatus();
         TCB::timeSliceCounter = 0;
-        TCB::dispatch();
+        TCB::urosDispatch();
         w_sstatus(sstatus);
         w_sepc(sepc);
     }
@@ -35,7 +75,7 @@ void Riscv::handleSupervisorTrap()
             uint64 volatile sepc = r_sepc();
             uint64 volatile sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
-            TCB::dispatch();
+            TCB::urosDispatch();
             w_sstatus(sstatus);
             w_sepc(sepc);
         }

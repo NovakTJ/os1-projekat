@@ -1,5 +1,6 @@
 #include"../h/MemoryAllocator.h"
 #include"../h/print.hpp"
+#include"../h/riscv.hpp"
 #include"../lib/mem.h"
 
 // Known bugs:
@@ -24,18 +25,26 @@ size_t MemoryAllocator::MMDSIZE = 8;
 
 void* __mem_alloc(size_t size)
 {
-    //TODO: this is not a system call and it should be. call ::allocate from stvec. here just li a0 and ecall.
-    void* rtn =  (void*)MemoryAllocator::allocate(size);
-    // MemoryAllocator::printInfo();
-    return rtn;
+    return (void*)Riscv::ecall(0x01, size);
 }
 
 int __mem_free(void* ptr)
 {
-    //TODO: this is not a system call and it should be. call ::deallocate from stvec. here just li a0 and ecall.
-    int x = MemoryAllocator::deallocate((char*)ptr);
-    // MemoryAllocator::printInfo();
-    return x;
+    return Riscv::ecall(0x02, (uint64)ptr);
+}
+
+;
+size_t __mem_get_free_space()
+{
+    return Riscv::ecall(0x03);
+
+}
+
+//TODO: figure out why they gave us __mem_free in project base and mem_free for the syscall, but not __mem_get_largest_free_block .
+size_t __mem_get_largest_free_block()
+{
+    return Riscv::ecall(0x04);
+
 }
 
 

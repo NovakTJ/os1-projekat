@@ -6,13 +6,16 @@
 #define OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_TCB_HPP
 
 #include "../lib/hw.h"
+#include "../h/MemoryAllocator.h"
 #include "scheduler.hpp"
 
 // Thread Control Block
 class TCB
 {
 public:
-    ~TCB() { delete[] stack; }
+    void* operator new(size_t size) { return MemoryAllocator::allocate(size); }
+    void operator delete(void* ptr) { MemoryAllocator::deallocate((char*)ptr); }
+    ~TCB() { if (stack) MemoryAllocator::deallocate((char*)stack); }
 
     bool isFinished() const { return finished; }
 
@@ -31,7 +34,7 @@ public:
 private:
     TCB(Body body, uint64 timeSlice) :
             body(body),
-            stack(body != nullptr ? new uint64[STACK_SIZE] : nullptr),
+            stack(body != nullptr ? (uint64*)MemoryAllocator::allocate(STACK_SIZE * sizeof(uint64)) : nullptr),
             context({(uint64) &threadWrapper,
                      stack != nullptr ? (uint64) &stack[STACK_SIZE] : 0
                     }),
@@ -59,7 +62,7 @@ private:
 
     static void contextSwitch(Context *oldContext, Context *runningContext);
 
-    static void dispatch();
+    static void urosDispatch();
 
     static uint64 timeSliceCounter;
 
