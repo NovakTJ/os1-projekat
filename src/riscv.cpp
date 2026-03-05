@@ -51,7 +51,7 @@ void Riscv::handleSupervisorTrap()
             //TODO: implemet the following: syscallReturnValue = (uint64)MemoryAllocator::largestAvailableBlock();
             break;
         case 0x13:
-            uin64 volatile sepc = r_sepc();
+            uint64 volatile sepc = r_sepc();
             uint64 volatile sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
             TCB::urosDispatch(); //execution stops and later continues here, in contextSwitch.S
@@ -75,7 +75,7 @@ void Riscv::handleSupervisorTrap()
             uint64 volatile sepc = r_sepc();
             uint64 volatile sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
-            TCB::urosDispatch();
+            TCB::urosDispatch();  //execution stops and later continues here, in contextSwitch.S
             w_sstatus(sstatus);
             w_sepc(sepc);
         }
