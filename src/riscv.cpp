@@ -6,6 +6,7 @@
 #include "../h/tcb.hpp"
 #include "../lib/console.h"
 #include "../h/MemoryAllocator.h"
+#include "../h/print.hpp"
 
 
 //TODO: ctrl replace MemoryAllocator.h with .hpp everywhere and rename the file too
@@ -20,7 +21,6 @@ void Riscv::handleSupervisorTrap()
     uint64 scause = r_scause();
     if (scause == 0x0000000000000008UL || scause == 0x0000000000000009UL)
     {
-
         // interrupt: no; cause code: environment call from U-mode(8) or S-mode(9)
         //TODO: write a long switch
         bool hasReturnValue = true;
@@ -50,7 +50,7 @@ void Riscv::handleSupervisorTrap()
         case 0x04:
             //TODO: implemet the following: syscallReturnValue = (uint64)MemoryAllocator::largestAvailableBlock();
             break;
-        case 0x13:
+        case 0x13: {
             uint64 volatile sepc = r_sepc();
             uint64 volatile sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
@@ -59,6 +59,10 @@ void Riscv::handleSupervisorTrap()
             w_sepc(sepc);
             hasReturnValue = false;
             break;
+        }
+        default:
+
+            printString("unexpected ecall or error!\n");
         }
         if (hasReturnValue)
         {
@@ -88,5 +92,6 @@ void Riscv::handleSupervisorTrap()
     else
     {
         // unexpected trap cause
+        printString("unexpected trap, what?");
     }
 }
