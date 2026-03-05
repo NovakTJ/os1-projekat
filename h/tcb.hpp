@@ -44,7 +44,7 @@ private:
         if (body != nullptr) { Scheduler::put(this); }
     }
 
-    struct Context
+    struct Context //the rest of the context is kept on the stack
     {
         uint64 ra;
         uint64 sp;
