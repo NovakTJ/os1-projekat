@@ -13,11 +13,16 @@
 #include "../lib/console.h"
 #include "../lib/mem.h"
 extern void urosThreadTest();
+extern void testHeavyMemory();
+
 int main()
 {
 
     MemoryAllocator::init();
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap); //konzola ce da sjebe ovo
-	urosThreadTest();
+testHeavyMemory();
+//TODO: call testHeavyMemory from a U-mode thread. im getting errors because of nested ecalls. maybe work on the final usermain call and call the test from usermain.
+urosThreadTest();
+
     return 0;
 }

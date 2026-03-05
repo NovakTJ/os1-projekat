@@ -2,6 +2,14 @@
 // Created by os on 3/4/26.
 //
 
+#include "../h/tcb.hpp"
+#include "../h/workers.hpp"
+#include "../h/print.hpp"
+#include "../h/riscv.hpp"
+
+#include "../h/MemoryAllocator.h"
+#include "../lib/console.h"
+#include "../lib/mem.h"
 
 // --- Memory allocator stress tests ---
 

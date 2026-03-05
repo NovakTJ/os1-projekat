@@ -275,7 +275,8 @@ int MemoryAllocator::deallocate(char* address)
     auto fmmd = (MMD*)address - 1;
     if (!fmmd->isAllocated())
     {
-        //TODO: what happens here?
+        printString("double free\n");
+        printInfo();
         return -1;
     }
     uint32 nBlocks = fmmd->size;
