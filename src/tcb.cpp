@@ -6,8 +6,7 @@
 #include "../h/riscv.hpp"
 
 
-//TODO: we know that a thread created in usermode creates usermode threads. make sure that threads created in kernelmode are usermode threads too. check where Riscv::mc_SPP is called.
-
+//TODO: find the semaphore from the videos
 TCB *TCB::running = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
