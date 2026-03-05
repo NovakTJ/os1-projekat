@@ -17,7 +17,7 @@ private:
         Elem *next;
 
         Elem(T *data, Elem *next) : data(data), next(next) {}
-        void* operator new(size_t size) { return MemoryAllocator::allocate(size); }
+        void* operator new(size_t size) { return MemoryAllocator::allocateBytes(size); }
         void operator delete(void* ptr) { MemoryAllocator::deallocate((char*)ptr); }
     };
 

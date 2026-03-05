@@ -6,6 +6,7 @@
 #include "../h/workers.hpp"
 #include "../h/print.hpp"
 #include "../h/riscv.hpp"
+#include "../h/MemoryAllocator.h"
 
 
 //TODO: delete
@@ -13,11 +14,21 @@
 #include "../lib/console.h"
 #include "../lib/mem.h"
 
+//TODO: skontati focus i escap eu clionu. valjda moze i bez toga. ima vise test primera sa escape prekidanjem.
+
 int main()
 {
 
     MemoryAllocator::init();
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap); //konzola ce da sjebe ovo
+    for (int bytes = 1; bytes<200; bytes++)
+    {
+        if (
+            MemoryAllocator::neededBlocks(bytes) !=
+            MemoryAllocator::neededBlocks(MemoryAllocator::neededBytes(MemoryAllocator::neededBlocks(bytes)))
+            ) printString("mismatch!\n");
+    }
+     printString("no mismatch!\n");
 
     TCB *threads[5];
 

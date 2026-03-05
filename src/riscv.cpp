@@ -39,7 +39,7 @@ void Riscv::handleSupervisorTrap()
         {
 
         case 0x01:
-            syscallReturnValue = (uint64)MemoryAllocator::allocate(arg1);
+            syscallReturnValue = (uint64)MemoryAllocator::allocateBlocks(arg1);
             break;
         case 0x02:
             syscallReturnValue = (uint64)MemoryAllocator::deallocate((char*)arg1);
