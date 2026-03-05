@@ -25,6 +25,7 @@ size_t MemoryAllocator::MMDSIZE = 8;
 
 void* __mem_alloc(size_t size)
 {
+    //TODO: convert byte count to block count
     return (void*)Riscv::ecall(0x01, size);
 }
 
@@ -149,6 +150,11 @@ uint32 neededBlocks(size_t nBytes)
 bool MemoryAllocator::slabGood(MMD* mmd, size_t nBytes)
 {
     return neededBlocks(nBytes)<=mmd->size;
+    /*plan 1:
+     *just calculate the n of bytes before calling memoryallocator. this is shitty code but i wont rework it.
+     *plan 2:
+     *rework allocate to work w blocks and not bytes. too difficult.
+     */
 }
 
 bool MemoryAllocator::slabMoreThanGood(MMD* mmd, size_t nBytes)
@@ -198,8 +204,9 @@ MMD* MemoryAllocator::createFirstTwoSlabs()
     return bmmd;
 }
 
-char* MemoryAllocator::allocate(size_t nBytes)
+char* MemoryAllocator::allocate(size_t nBlocks)
 {
+    size_t nBytes = nBlocks; //TODO: THIS IS TERRIBLE NOO
 
     if (!initialized) return nullptr;
 
