@@ -34,6 +34,7 @@ void Riscv::handleSupervisorTrap()
         __asm__ volatile("ld %0, 96(sp)" : "=r"(arg2));
         __asm__ volatile("ld %0, 104(sp)" : "=r"(arg3));
 
+        w_sepc(r_sepc() + 4);
         switch (opcode)
         {
 
@@ -50,20 +51,19 @@ void Riscv::handleSupervisorTrap()
             //TODO: implemet the following: syscallReturnValue = (uint64)MemoryAllocator::largestAvailableBlock();
             break;
         case 0x13:
-            //uros yield / spec thread_dispatch - do nothing
-
+            uin64 volatile sepc = r_sepc();
+            uint64 volatile sstatus = r_sstatus();
+            TCB::timeSliceCounter = 0;
+            TCB::urosDispatch(); //execution stops and later continues here, in contextSwitch.S
+            w_sstatus(sstatus);
+            w_sepc(sepc);
             hasReturnValue = false;
-            break; }
+            break;
+        }
         if (hasReturnValue)
         {
             __asm__ volatile("sd %0, 80(sp)" : : "r"(syscallReturnValue));
         }
-        uint64 volatile sepc = r_sepc() + 4;
-        uint64 volatile sstatus = r_sstatus();
-        TCB::timeSliceCounter = 0;
-        TCB::urosDispatch();
-        w_sstatus(sstatus);
-        w_sepc(sepc);
     }
     else if (scause == 0x8000000000000001UL)
     {
