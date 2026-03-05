@@ -5,9 +5,11 @@
 #include "../lib/hw.h"
 #include "../h/tcb.hpp"
 #include "../h/print.hpp"
-
+#include"../lib/mem.h"
 void workerBodyA()
 {
+	void* x = __mem_alloc(2);
+	__mem_free(x);
     for (uint64 i = 0; i < 10; i++)
     {
         printString("A: i=");

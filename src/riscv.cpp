@@ -6,6 +6,7 @@
 #include "../h/tcb.hpp"
 #include "../lib/console.h"
 #include "../h/MemoryAllocator.h"
+#include "../h/print.hpp"
 
 
 //TODO: ctrl replace MemoryAllocator.h with .hpp everywhere and rename the file too
@@ -14,7 +15,6 @@ void Riscv::popSppSpie()
     __asm__ volatile("csrw sepc, ra"); //???
     __asm__ volatile("sret");
 }
-
 void Riscv::handleSupervisorTrap()
 {
     uint64 scause = r_scause();
@@ -22,22 +22,20 @@ void Riscv::handleSupervisorTrap()
     {
 
         // interrupt: no; cause code: environment call from U-mode(8) or S-mode(9)
-        //TODO: write a long switch
+
         bool hasReturnValue = true;
         uint64 volatile opcode;
         uint64 volatile arg1;
         uint64 volatile arg2;
         uint64 volatile arg3;
         uint64 volatile syscallReturnValue;
-        __asm__ volatile("ld %0, 80(sp)" : "=r"(opcode));
-        __asm__ volatile("ld %0, 88(sp)" : "=r"(arg1));
-        __asm__ volatile("ld %0, 96(sp)" : "=r"(arg2));
-        __asm__ volatile("ld %0, 104(sp)" : "=r"(arg3));
+        __asm__ volatile("ld %0, 80(s0)" : "=r"(opcode)); //DO NOT PUT THIS IN ANOTHER FUNCTION
+        __asm__ volatile("ld %0, 88(s0)" : "=r"(arg1)); //DO NOT PUT THIS IN ANOTHER FUNCTION
+        __asm__ volatile("ld %0, 96(s0)" : "=r"(arg2)); //DO NOT PUT THIS IN ANOTHER FUNCTION
+        __asm__ volatile("ld %0, 104(s0)" : "=r"(arg3)); //DO NOT PUT THIS IN ANOTHER FUNCTION
 
-        w_sepc(r_sepc() + 4);
         switch (opcode)
         {
-
         case 0x01:
             syscallReturnValue = (uint64)MemoryAllocator::allocate(arg1);
             break;
@@ -50,19 +48,30 @@ void Riscv::handleSupervisorTrap()
         case 0x04:
             //TODO: implemet the following: syscallReturnValue = (uint64)MemoryAllocator::largestAvailableBlock();
             break;
-        case 0x13:
-            uint64 volatile sepc = r_sepc();
-            uint64 volatile sstatus = r_sstatus();
-            TCB::timeSliceCounter = 0;
-            TCB::urosDispatch(); //execution stops and later continues here, in contextSwitch.S
-            w_sstatus(sstatus);
-            w_sepc(sepc);
+        case 0x13:{
+                uint64 volatile sepc = r_sepc();
+                uint64 volatile sstatus = r_sstatus();
+                TCB::timeSliceCounter = 0;
+                TCB::urosDispatch(); //execution stops and later continues here, in contextSwitch.S
+                w_sstatus(sstatus);
+                w_sepc(sepc);
+                hasReturnValue = false;
+                break;
+        }
+        default:
             hasReturnValue = false;
+            __asm__ volatile("addi x1, x1, 0"); //noop
+            printString("unexpected a0 (prob. 0), sepc=");
+            printHexInteger(r_sepc());
+            printString(" opcode=");
+            printHexInteger(opcode);
+            printString("\n");
             break;
         }
+        w_sepc(r_sepc() + 4);
         if (hasReturnValue)
         {
-            __asm__ volatile("sd %0, 80(sp)" : : "r"(syscallReturnValue));
+            __asm__ volatile("sd %0, 80(s0)" : : "r"(syscallReturnValue)); //DO NOT PUT THIS IN ANOTHER FUNCTION
         }
     }
     else if (scause == 0x8000000000000001UL)
@@ -87,6 +96,9 @@ void Riscv::handleSupervisorTrap()
     }
     else
     {
-        // unexpected trap cause
+        printString("unexpected scause (prob. 2), sepc=");
+        printHexInteger(r_sepc());
+            printString("\n");
+
     }
 }
