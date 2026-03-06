@@ -26,13 +26,18 @@ public:
     using BodyNoArg = void (*)();
     using BodyWithArg = void(*)(void*);
 
+    // Kernel-internal: allocates stack itself
     static int createThread(TCB ** handle, BodyWithArg body, void* arg);
 
-    static void yield();
+    // ABI-level: stack_space points to the last byte of pre-allocated stack
+    static int createThread(TCB ** handle, BodyWithArg body, void* arg, void* stack_space);
+
+    static void exit();
 
     static TCB *running;
 
 private:
+    // Kernel-internal constructor: allocates stack
     TCB(BodyWithArg body, void* arg, uint64 timeSlice) :
             body(body),
             arg(arg),
@@ -43,7 +48,21 @@ private:
             timeSlice(timeSlice),
             finished(false)
     {
-        if (body != nullptr) { Scheduler::put(this); } //TODO: jel ovo moze i dalje
+        if (body != nullptr) { Scheduler::put(this); }
+    }
+
+    // ABI constructor: uses pre-allocated stack (does NOT own it)
+    TCB(BodyWithArg body, void* arg, void* stack_space, uint64 timeSlice) :
+            body(body),
+            arg(arg),
+            stack(nullptr), // not owned, don't free in destructor
+            context({(uint64) &threadWrapper,
+                     stack_space != nullptr ? (uint64) stack_space : 0
+                    }),
+            timeSlice(timeSlice),
+            finished(false)
+    {
+        if (body != nullptr) { Scheduler::put(this); }
     }
 
     struct Context //the rest of the context is kept on the stack

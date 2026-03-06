@@ -23,30 +23,7 @@ size_t MemoryAllocator::totalAvailableBytes()
 
 size_t MemoryAllocator::MMDSIZE = 8;
 
-void* __mem_alloc(size_t size)
-{
-    //TODO: convert byte count to block count
-    return (void*)Riscv::ecall(0x01, size);
-}
 
-int __mem_free(void* ptr)
-{
-    return Riscv::ecall(0x02, (uint64)ptr);
-}
-
-;
-size_t __mem_get_free_space()
-{
-    return Riscv::ecall(0x03);
-
-}
-
-//TODO: figure out why they gave us __mem_free in project base and mem_free for the syscall, but not __mem_get_largest_free_block .
-size_t __mem_get_largest_free_block()
-{
-    return Riscv::ecall(0x04);
-
-}
 
 
 // MMD member function implementations

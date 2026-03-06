@@ -3,6 +3,7 @@
 //
 
 #include "../h/tcb.hpp"
+#include "../h/syscall_c.h"
 #include"../h/print.hpp"
 #include "../h/riscv.hpp"
 #include "../h/workers.hpp"
@@ -33,7 +34,7 @@ while (!(threads[1]->isFinished() &&
          threads[3]->isFinished() &&
          threads[4]->isFinished()))
 {
-    TCB::yield();
+    thread_dispatch();
 }
 printHexInteger((uint64)threads[1]);
 printString("\n");	printHexInteger((uint64)threads[2]);

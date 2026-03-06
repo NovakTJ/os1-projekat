@@ -27,7 +27,7 @@ void recursiveAllocTest(int depth, int maxDepth) {
         return;
     }
 
-    void* ptr = __mem_alloc(size);
+    void* ptr = mem_alloc(size);
     if (!ptr) {
         printString("  FAIL@d");
         printInteger(depth);
@@ -53,7 +53,7 @@ void recursiveAllocTest(int depth, int maxDepth) {
     }
     printString(ok ? "ok " : "CORRUPT ");
 
-    __mem_free(ptr);
+    mem_free(ptr);
 }
 
 // Fragmentation test: allocate 8 large blocks, free odd ones (holes),
@@ -70,26 +70,26 @@ void fragmentationTest() {
 
     printString("  alloc ");
     for (int i = 0; i < N; i++) {
-        ptrs[i] = __mem_alloc(BLOCK_SZ);
+        ptrs[i] = mem_alloc(BLOCK_SZ);
         __putc(ptrs[i] ? '+' : 'X');
     }
 
     printString(" holes ");
     for (int i = 1; i < N; i += 2) {
-        __mem_free(ptrs[i]);
+        mem_free(ptrs[i]);
         ptrs[i] = nullptr;
         __putc('-');
     }
 
     printString(" refill ");
     for (int i = 1; i < N; i += 2) {
-        ptrs[i] = __mem_alloc(BLOCK_SZ);
+        ptrs[i] = mem_alloc(BLOCK_SZ);
         __putc(ptrs[i] ? '+' : 'X');
     }
 
     printString(" cleanup ");
     for (int i = N - 1; i >= 0; i--) {
-        if (ptrs[i]) { __mem_free(ptrs[i]); __putc('-'); }
+        if (ptrs[i]) { mem_free(ptrs[i]); __putc('-'); }
     }
     printString(" OK\n");
 }
@@ -105,14 +105,14 @@ void treeAllocTest(int depth) {
         return;
     }
 
-    void* ptr = __mem_alloc(size);
+    void* ptr = mem_alloc(size);
     if (!ptr) { __putc('X'); return; }
     __putc('(');
 
     treeAllocTest(depth - 1);
     treeAllocTest(depth - 1);
 
-    __mem_free(ptr);
+    mem_free(ptr);
     __putc(')');
 }
 void bigblocktest()
@@ -120,38 +120,38 @@ void bigblocktest()
     int t = MemoryAllocator::totalAvailableBytes();
     printHexInteger(t);
     printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
-    auto a = __mem_alloc(t/2-10);
-    auto b = __mem_alloc(t/2-10);
+    auto a = mem_alloc(t/2-10);
+    auto b = mem_alloc(t/2-10);
     printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
 
     if (!a || !b) printString("FAIL");
-    __mem_free(a);    if (!a || !b) printString("FAIL");
+    mem_free(a);    if (!a || !b) printString("FAIL");
 
-    __mem_free(b);    if (!a || !b) printString("FAIL");
+    mem_free(b);    if (!a || !b) printString("FAIL");
     printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
 
-    a = __mem_alloc(t*2/3);    if (!a || !b) printString("FAIL");
+    a = mem_alloc(t*2/3);    if (!a || !b) printString("FAIL");
 
-    b = __mem_alloc(t/5);    if (!a || !b) printString("FAIL");
+    b = mem_alloc(t/5);    if (!a || !b) printString("FAIL");
     printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
 
-    __mem_free(a);    if (!a || !b) printString("FAIL");
+    mem_free(a);    if (!a || !b) printString("FAIL");
 
-    a = __mem_alloc(t*2/3-5);    if (!a || !b) printString("FAIL");
+    a = mem_alloc(t*2/3-5);    if (!a || !b) printString("FAIL");
 
-    __mem_free(b);    if (!a || !b) printString("FAIL");
+    mem_free(b);    if (!a || !b) printString("FAIL");
 
-    b = __mem_alloc(t/5);    if (!a || !b) printString("FAIL");
+    b = mem_alloc(t/5);    if (!a || !b) printString("FAIL");
     printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
 
-    auto c = __mem_alloc(1);    if (!a || !b || !c) printString("FAIL");
+    auto c = mem_alloc(1);    if (!a || !b || !c) printString("FAIL");
     printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
 
-    __mem_free(a);    if (!a || !b || !c) printString("FAIL");
+    mem_free(a);    if (!a || !b || !c) printString("FAIL");
 
-    __mem_free(b);    if (!a || !b || !c) printString("FAIL");
+    mem_free(b);    if (!a || !b || !c) printString("FAIL");
 
-    __mem_free(c);    if (!a || !b || !c) printString("FAIL");
+    mem_free(c);    if (!a || !b || !c) printString("FAIL");
     printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
 
 }
@@ -164,26 +164,26 @@ void coalesceTest() {
         return;
     }
 
-    void* a = __mem_alloc(chunkSz);
-    void* b = __mem_alloc(chunkSz);
-    void* c = __mem_alloc(chunkSz);
+    void* a = mem_alloc(chunkSz);
+    void* b = mem_alloc(chunkSz);
+    void* c = mem_alloc(chunkSz);
     printString("  abc allocated ");
 
-    __mem_free(b);
+    mem_free(b);
     __putc('1');
-    __mem_free(a);
+    mem_free(a);
     __putc('2');
-    __mem_free(c);
+    mem_free(c);
     __putc('3');
 
     // Everything should be coalesced; try a large alloc
     size_t bigSz = MemoryAllocator::totalAvailableBytes() / 2;
-    void* big = __mem_alloc(bigSz);
+    void* big = mem_alloc(bigSz);
     if (big) {
         printString(" big(");
         printInteger(bigSz);
         printString(")=OK");
-        __mem_free(big);
+        mem_free(big);
     } else {
         printString(" big=FAIL");
     }

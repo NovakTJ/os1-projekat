@@ -4,7 +4,7 @@
 
 #include "../h/tcb.hpp"
 #include "../h/riscv.hpp"
-
+#include "../h/syscall_c.h"
 
 //TODO: find the semaphore from the videos
 TCB *TCB::running = nullptr;
@@ -14,15 +14,18 @@ uint64 TCB::timeSliceCounter = 0;
 int TCB::createThread(TCB ** handle, BodyWithArg body, void* arg)
 {
     *handle = new TCB(body, arg, TIME_SLICE);
-    return (*handle != nullptr);
+    if (*handle == nullptr) return -1;
+    return 0;
 }
 
-void TCB::yield()
+int TCB::createThread(TCB ** handle, BodyWithArg body, void* arg, void* stack_space)
 {
-    //TODO: this is compatible with uros's code. not sure if its compatible w the final code. it is if the required thread_dispatch syscall calls this function.
-    //in Uros's code this function is called only from superviser mode and not from usermain() im 80% sure. but it should work even if it's called from user mode becaue it elevates.
-    Riscv::ecall(0x13);
+    *handle = new TCB(body, arg, stack_space, TIME_SLICE);
+    if (*handle == nullptr) return -1;
+    return 0;
 }
+
+
 
 void TCB::urosDispatch()
 {
@@ -38,6 +41,5 @@ void TCB::threadWrapper()
 {
     Riscv::popSppSpie(); //brings down the priv level with sret black magic
     running->body(running->arg); //does the fn
-    running->setFinished(true);
-    TCB::yield();
+    thread_exit();
 }

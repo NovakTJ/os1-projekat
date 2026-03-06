@@ -29,11 +29,13 @@ void Riscv::handleSupervisorTrap()
         uint64 volatile arg1;
         uint64 volatile arg2;
         uint64 volatile arg3;
+        uint64 volatile arg4;
         uint64 volatile syscallReturnValue;
         __asm__ volatile("ld %0, 80(s0)" : "=r"(opcode)); //DO NOT PUT THIS IN ANOTHER FUNCTION
         __asm__ volatile("ld %0, 88(s0)" : "=r"(arg1)); //DO NOT PUT THIS IN ANOTHER FUNCTION
         __asm__ volatile("ld %0, 96(s0)" : "=r"(arg2)); //DO NOT PUT THIS IN ANOTHER FUNCTION
         __asm__ volatile("ld %0, 104(s0)" : "=r"(arg3)); //DO NOT PUT THIS IN ANOTHER FUNCTION
+        __asm__ volatile("ld %0, 112(s0)" : "=r"(arg4)); //DO NOT PUT THIS IN ANOTHER FUNCTION
 
         switch (opcode)
         {
@@ -47,9 +49,25 @@ void Riscv::handleSupervisorTrap()
             syscallReturnValue = (uint64)MemoryAllocator::totalAvailableBytes();
             break;
         case 0x04:
-            //TODO: implemet the following: syscallReturnValue = (uint64)MemoryAllocator::largestAvailableBlock();
+            //TODO: implement the following: syscallReturnValue = (uint64)MemoryAllocator::largestAvailableBlock();
             break;
+        case 0x11: { // thread_create(handle, start_routine, arg, stack_space)
+            syscallReturnValue = (uint64)TCB::createThread(
+                (TCB**)arg1,
+                (TCB::BodyWithArg)arg2,
+                (void*)arg3,
+                (void*)arg4
+            );
+            break;
+        }
+        case 0x12: { // thread_exit
+                running->setFinished(True);
+            TCB::urosDispatch();
+            printString("massive error: dead thread walks again\n");
+            hasReturnValue = false;
+        }
         case 0x13:{
+
                 uint64 volatile sepc = r_sepc();
                 uint64 volatile sstatus = r_sstatus();
                 TCB::timeSliceCounter = 0;
