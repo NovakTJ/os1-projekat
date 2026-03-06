@@ -7,7 +7,7 @@
 #include"../lib/hw.h"
 
 
-
+//TODO: where the fuck is neededBytes
 struct MMD
 {
     uint32 size; //number of blocks, including the next metadata.
