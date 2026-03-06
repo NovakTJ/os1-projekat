@@ -1,0 +1,85 @@
+i wrote the memoryallocator class. can you check the code and review it?
+   im a student i need advice on code practices. but also keep in mind
+  that this is a uni project so doesnt really need to be oop or modifiable
+
+● I'll find and read your MemoryAllocator implementation.
+
+● Searched for 2 patterns, read 2 files (ctrl+o to expand)
+
+● Let me also check the hw.h header for the constants you're using.
+
+● Read 1 file (ctrl+o to expand)
+
+● Here's my code review:
+
+  Critical Bug
+
+  isAllocated() logic is inverted (line 35-38 in cpp):
+  bool MMD::isAllocated()
+  {
+      return nextBID < (uint32)(-1);  // WRONG: returns true for almost
+  everything
+  }
+  (uint32)(-1) is 0xFFFFFFFF. Almost all valid BIDs are less than this, so this
+   returns true even for free blocks. Should be:
+  return nextBID == (uint32)(-1);
+  STATUS: FIXED
+
+  Major Bug
+
+  Allocated block size is never updated (lines 114-134):
+  When you split a slab, you create the new smaller free slab correctly, but
+  the allocated block keeps the original (larger) size. Then in deallocate():
+  uint32 nBlocks = fmmd->size;  // This is the ORIGINAL size, not what was
+  allocated
+  totalAvailableBlocks += nBlocks;
+  If you allocate 1 block from a 100-block slab, freeing it adds back 100
+  blocks. This is a memory accounting bug. Fix: set wholeSlabMMD->size =
+  neededBlocks(nBytes) before splitting.
+  STATUS: FIXED
+  Dead Code
+
+  Lines 182-186:
+  while (canMerge(iteratorAddress))
+  {
+      break;  // Immediately breaks - loop never executes merge()
+      merge(iteratorAddress);
+  }
+
+  Minor Issues
+
+  1. neededBlocks is a free function (line 89) - should be static in the class
+  or in an anonymous namespace to avoid polluting the global namespace.
+  2. MMDSIZE should use sizeof - you hardcode 8, but sizeof(MMD) would be safer
+   and self-documenting.
+  3. Comment on line 80 mentions "claude can do it later" - probably want to
+  remove this before submission.
+  4. totalAvailableBytes() calculation (line 11-14) subtracts MMDSIZE once, but
+   that doesn't account for MMD overhead per slab correctly. This is minor if
+  you're not using this function. //THIS IS TECHICALLY KINDA WRONG BUT OK FOR THE PROJ
+  STATUS: ALL 4 REVIEWED
+  What's Good
+
+  1. Block indices instead of pointers - clever optimization, saves 4 bytes per
+   node on 64-bit. Shows you thought about memory efficiency.
+  2. Circular list with sentinel - good design pattern that eliminates special
+  cases for empty list.
+  3. Roving pointer (iteratorAddress advances after each allocation) - helps
+  distribute allocations more evenly, reducing fragmentation. This is a real
+  allocator technique.
+  4. neededBlocks logic - correctly accounts for the MMD space at the end of
+  each slab. I traced through the math and it's correct.
+  5. First-fit with splitting - appropriate algorithm for this project.
+
+  Suggestions
+
+  For a uni project, the code structure is fine. A few small improvements:
+
+  1. Consider renaming MMD to something clearer like BlockHeader or
+  SlabMetadata.
+  2. The getNext()/setNext() abstraction over block indices is clean - good
+  encapsulation.
+  3. Add a comment at the top explaining the memory layout (MMD at end of
+  previous block, user data follows).
+
+  Would you like me to help fix the critical bugs, or do you want to work

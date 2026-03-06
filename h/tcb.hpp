@@ -23,17 +23,19 @@ public:
 
     uint64 getTimeSlice() const { return timeSlice; }
 
-    using Body = void (*)();
+    using BodyNoArg = void (*)();
+    using BodyWithArg = void(*)(void*);
 
-    static TCB *createThread(Body body);
+    static int createThread(TCB ** handle, BodyWithArg body, void* arg);
 
     static void yield();
 
     static TCB *running;
 
 private:
-    TCB(Body body, uint64 timeSlice) :
+    TCB(BodyWithArg body, void* arg, uint64 timeSlice) :
             body(body),
+            arg(arg),
             stack(body != nullptr ? (uint64*)MemoryAllocator::allocate(STACK_SIZE * sizeof(uint64)) : nullptr),
             context({(uint64) &threadWrapper,
                      stack != nullptr ? (uint64) &stack[STACK_SIZE] : 0
@@ -41,7 +43,7 @@ private:
             timeSlice(timeSlice),
             finished(false)
     {
-        if (body != nullptr) { Scheduler::put(this); }
+        if (body != nullptr) { Scheduler::put(this); } //TODO: jel ovo moze i dalje
     }
 
     struct Context //the rest of the context is kept on the stack
@@ -50,7 +52,8 @@ private:
         uint64 sp;
     };
 
-    Body body;
+    BodyWithArg body;
+    void* arg;
     uint64 *stack;
     Context context;
     uint64 timeSlice;

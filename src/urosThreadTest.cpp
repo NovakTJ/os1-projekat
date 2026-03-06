@@ -10,16 +10,16 @@ void urosThreadTest()
 {
 TCB *threads[5];
 
-threads[0] = TCB::createThread(nullptr);
+TCB::createThread(threads, nullptr, (void*)0);
 TCB::running = threads[0];
 
-threads[1] = TCB::createThread(workerBodyA);
+TCB::createThread(threads+1, workerBodyA, (void*)0);
 printString("ThreadA created\n");
-threads[2] = TCB::createThread(workerBodyB);
+TCB::createThread(threads+2, workerBodyB, (void*)0);
 printString("ThreadB created\n");
-threads[3] = TCB::createThread(workerBodyC);
+TCB::createThread(threads+3, workerBodyC, (void*)0);
 printString("ThreadC created\n");
-threads[4] = TCB::createThread(workerBodyD);
+TCB::createThread(threads+4, workerBodyD, (void*)0);
 printString("ThreadD created\n");
 
 Riscv::ms_sstatus(Riscv::SSTATUS_SIE);

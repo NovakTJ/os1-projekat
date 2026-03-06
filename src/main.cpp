@@ -20,7 +20,7 @@ int main()
 
     MemoryAllocator::init();
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap); //konzola ce da sjebe ovo
-testHeavyMemory();
+//testHeavyMemory();
 //TODO: call testHeavyMemory from a U-mode thread. im getting errors because of nested ecalls. maybe work on the final usermain call and call the test from usermain.
 urosThreadTest();
 

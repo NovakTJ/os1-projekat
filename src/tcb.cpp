@@ -11,9 +11,10 @@ TCB *TCB::running = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
 
-TCB *TCB::createThread(Body body)
+int TCB::createThread(TCB ** handle, BodyWithArg body, void* arg)
 {
-    return new TCB(body, TIME_SLICE);
+    *handle = new TCB(body, arg, TIME_SLICE);
+    return (*handle != nullptr);
 }
 
 void TCB::yield()
@@ -36,7 +37,7 @@ void TCB::urosDispatch()
 void TCB::threadWrapper()
 {
     Riscv::popSppSpie(); //brings down the priv level with sret black magic
-    running->body(); //does the fn
+    running->body(running->arg); //does the fn
     running->setFinished(true);
     TCB::yield();
 }

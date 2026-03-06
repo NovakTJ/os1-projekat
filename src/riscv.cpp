@@ -4,6 +4,7 @@
 
 #include "../h/riscv.hpp"
 #include "../h/tcb.hpp"
+#include "../h/semaphore.hpp"
 #include "../lib/console.h"
 #include "../h/MemoryAllocator.h"
 #include "../h/print.hpp"
@@ -58,6 +59,24 @@ void Riscv::handleSupervisorTrap()
                 hasReturnValue = false;
                 break;
         }
+        case 0x21: // sem_open
+            syscallReturnValue = (uint64)_sem::open((_sem**)arg1, (unsigned)arg2);
+            break;
+        case 0x22: // sem_close
+            syscallReturnValue = (uint64)_sem::close((_sem*)arg1);
+            break;
+        case 0x23: { // sem_wait (may block and context switch)
+            uint64 volatile sepc = r_sepc();
+            uint64 volatile sstatus = r_sstatus();
+            syscallReturnValue = (uint64)((_sem*)arg1)->wait();
+            w_sstatus(sstatus);
+            w_sepc(sepc);
+            break;
+        }
+        case 0x24: // sem_signal
+            //TODO: may context switch too?
+            syscallReturnValue = (uint64)((_sem*)arg1)->signal();
+            break;
         default:
             hasReturnValue = false;
             __asm__ volatile("addi x1, x1, 0"); //noop
