@@ -184,10 +184,8 @@ MMD* MemoryAllocator::createFirstTwoSlabs()
     return bmmd;
 }
 
-char* MemoryAllocator::allocateBytes(size_t nBlocks)
+char* MemoryAllocator::allocateBytes(size_t nBytes)
 {
-    size_t nBytes = nBlocks; //TODO: THIS IS TERRIBLE NOO
-
     if (!initialized) return nullptr;
 
     //first fit algorithm. also tries merging adjacent slabs.

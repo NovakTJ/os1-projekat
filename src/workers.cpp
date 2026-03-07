@@ -8,6 +8,7 @@
 #include "../h/syscall_c.h"
 void workerBodyA(void* aa)
 {
+//deprecated tests, idk if they work still.
     for (uint64 i = 0; i < 10; i++)
     {
         printString("A: i=");

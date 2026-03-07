@@ -6,7 +6,6 @@
 #include "../h/riscv.hpp"
 #include "../h/syscall_c.h"
 
-//TODO: find the semaphore from the videos
 TCB *TCB::running = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
@@ -25,16 +24,25 @@ int TCB::createThread(TCB ** handle, BodyWithArg body, void* arg, void* stack_sp
     return 0;
 }
 
+TCB* TCB::createForCurrent()
+{
+    // nullptr body => no stack alloc, no wrapper, no scheduler insertion
+    TCB* tcb = new TCB(nullptr, nullptr, TIME_SLICE);
+    return tcb;
+}
+
 
 
 void TCB::urosDispatch()
 {
-    //This is called by the kernel I think - not by usermode theread_dispathc, - the naming is unfortunate.
     TCB *old = running;
     if (!old->isFinished()) { Scheduler::put(old); }
-    running = Scheduler::get();
-
-    TCB::contextSwitch(&old->context, &running->context);
+    TCB *next = Scheduler::get();
+    if (next != nullptr) {
+        running = next;
+        TCB::contextSwitch(&old->context, &running->context);
+    }
+    // else: queue empty, keep running current thread
 }
 
 void TCB::threadWrapper()

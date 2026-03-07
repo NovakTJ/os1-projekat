@@ -32,6 +32,11 @@ public:
     // ABI-level: stack_space points to the last byte of pre-allocated stack
     static int createThread(TCB ** handle, BodyWithArg body, void* arg, void* stack_space);
 
+    // Creates a bare TCB for the already-running thread (no stack alloc, no wrapper, no scheduler)
+    static TCB* createForCurrent();
+
+    static void urosDispatch();
+
     static void exit();
 
     static TCB *running;
@@ -83,8 +88,6 @@ private:
     static void threadWrapper();
 
     static void contextSwitch(Context *oldContext, Context *runningContext);
-
-    static void urosDispatch();
 
     static uint64 timeSliceCounter;
 

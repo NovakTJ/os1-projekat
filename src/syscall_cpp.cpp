@@ -5,8 +5,10 @@
 Thread::Thread(void (*body)(void*), void* arg)
     : myHandle(nullptr), body(body), arg(arg) {}
 
+static void runWrapper(void* self) { ((Thread*)self)->run(); }
+
 Thread::Thread()
-    : myHandle(nullptr), body(nullptr), arg(nullptr) {}
+    : myHandle(nullptr), body(runWrapper), arg(this) {}
 
 Thread::~Thread() {}
 
@@ -14,7 +16,7 @@ int Thread::start() {
     if (body != nullptr) {
         return thread_create(&myHandle, body, arg);
     } else {
-        //TODO: what then
+        printString("big error, body is run() if not explicitly given\n");
         return 1;
     }
 }

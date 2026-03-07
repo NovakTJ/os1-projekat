@@ -1,27 +1,33 @@
-//
-// Created by marko on 20.4.22..
-//
-
 #include "../h/tcb.hpp"
-#include "../h/workers.hpp"
-#include "../h/print.hpp"
 #include "../h/riscv.hpp"
-
-
-//TODO: delete
 #include "../h/MemoryAllocator.h"
-#include "../lib/console.h"
-extern void urosThreadTest();
-extern void testHeavyMemory();
+
+extern void userMain();
+
+static void userMainWrapper(void* arg) {
+    (void)arg; //if we want to do sth first but we dont need to. arg is nullptr in the current call.
+    userMain();
+}
 
 int main()
 {
-
     MemoryAllocator::init();
-    Riscv::w_stvec((uint64) &Riscv::supervisorTrap); //konzola ce da sjebe ovo
-//testHeavyMemory();
-//TODO: call testHeavyMemory from a U-mode thread. im getting errors because of nested ecalls. maybe work on the final usermain call and call the test from usermain.
-urosThreadTest();
+    Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
+
+    TCB* boot = TCB::createForCurrent();
+    TCB::running = boot;
+
+    TCB* userThread;
+    TCB::createThread(&userThread, userMainWrapper, nullptr);
+
+    Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
+
+    while (!userThread->isFinished()) {
+        TCB::urosDispatch();
+    }
+
+    delete userThread;
+    delete boot;
 
     return 0;
 }
