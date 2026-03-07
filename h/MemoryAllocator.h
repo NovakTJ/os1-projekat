@@ -30,6 +30,7 @@ class MemoryAllocator
     static MMD* iteratorAddress;
     static uint32 totalAvailableBlocks;
     static size_t totalAvailableBytes();
+    static size_t largestAvailableBlock();
 
     static uint32 getBID(char* address);
     static char* getAdd(uint32 bid);

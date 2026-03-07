@@ -190,28 +190,36 @@ void coalesceTest() {
     printString("\n");
 }
 
-void testHeavyMemory()
+void testHeavyMemory123()
 {
-    printString("=== Mem Alloc Stress Tests ===\n");
+    printString("=== Mem Alloc Stress Tests 1-3 ===\n");
     printString("Available blocks: ");
     printInteger(MemoryAllocator::totalAvailableBytes());
     printString("\n");
-    /*
-        printString("[1] Recursive alloc/free (4 levels, big blocks):\n");
-        recursiveAllocTest(0, 4);
-        printString("\n  PASS\n");
 
-        printString("[2] Fragmentation (8 x 50-block chunks):\n");
-        fragmentationTest();
+    printString("[1] Recursive alloc/free (4 levels, big blocks):\n");
+    recursiveAllocTest(0, 4);
+    printString("\n  PASS\n");
 
-        printString("[3] Tree alloc (depth=3, 7 big allocs):\n  ");
-        treeAllocTest(3);
-        printString("\n  PASS\n");
+    printString("[2] Fragmentation (8 x 50-block chunks):\n");
+    fragmentationTest();
 
-        printString("[4] Coalescing (3 x 200-block chunks):\n");
-        coalesceTest();
-        */
+    printString("[3] Tree alloc (depth=3, 7 big allocs):\n  ");
+    treeAllocTest(3);
+    printString("\n  PASS\n");
+
+    printString("=== Tests 1-3 done ===\n");
+}
+
+void testHeavyMemory4()
+{
+    printString("=== Mem Alloc Stress Test 4 ===\n");
+    printString("Available blocks: ");
+    printInteger(MemoryAllocator::totalAvailableBytes());
+    printString("\n");
+
     printString("[4] big block test\n");
     bigblocktest();
-    printString("=== All tests done ===\n");
+
+    printString("=== Test 4 done ===\n");
 }

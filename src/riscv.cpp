@@ -49,7 +49,7 @@ void Riscv::handleSupervisorTrap()
             syscallReturnValue = (uint64)MemoryAllocator::totalAvailableBytes();
             break;
         case 0x04:
-            //TODO: implement the following: syscallReturnValue = (uint64)MemoryAllocator::largestAvailableBlock();
+            syscallReturnValue = (uint64)MemoryAllocator::largestAvailableBlock();
             break;
         case 0x11: { // thread_create(handle, start_routine, arg, stack_space)
             syscallReturnValue = (uint64)TCB::createThread(

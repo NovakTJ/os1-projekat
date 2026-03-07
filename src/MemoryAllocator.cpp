@@ -20,6 +20,29 @@ size_t MemoryAllocator::totalAvailableBytes()
     return totalAvailableBlocks*MEM_BLOCK_SIZE-MMDSIZE;
 }
 
+size_t MemoryAllocator::largestAvailableBlock()
+{
+    if (!initialized) return 0;
+    uint32 maxBlocks = 0;
+    MMD* start = iteratorAddress;
+    MMD* cur = start;
+    do
+    {
+        uint32 total = cur->size;
+        MMD* tmp = cur;
+        while (canMerge(tmp))
+        {
+            tmp = (MMD*)((char*)tmp + tmp->size * MEM_BLOCK_SIZE);
+            total += tmp->size;
+        }
+        if (total > maxBlocks)
+            maxBlocks = total;
+        cur = cur->getNext();
+    } while (cur != start);
+    if (maxBlocks == 0) return 0;
+    return (size_t)(maxBlocks - 1) * MEM_BLOCK_SIZE + (MEM_BLOCK_SIZE - MMDSIZE);
+}
+
 size_t MemoryAllocator::MMDSIZE = 8;
 
 
