@@ -37,6 +37,7 @@ class MemoryAllocator
     static size_t MMDSIZE;
     static void init();
     static void printInfo();
+    static void u_printInfo();
 
     static size_t neededBytes(size_t nBlocks);
     static uint32 neededBlocks(size_t nBytes);

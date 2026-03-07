@@ -276,6 +276,33 @@ void MemoryAllocator::printInfo()
     printString("===========================\n");
 }
 
+void MemoryAllocator::u_printInfo()
+{
+    u_printString("=== MemoryAllocator Info ===\n");
+    u_printString("startAddr: "); u_printHexInteger((uint64)startAddr); u_printString("\n");
+    u_printString("endAddr:   "); u_printHexInteger((uint64)endAddr); u_printString("\n");
+    u_printString("total blocks: "); u_printInteger((uint64)((endAddr - startAddr) / MEM_BLOCK_SIZE)); u_printString("\n");
+    u_printString("free blocks:  "); u_printInteger(totalAvailableBlocks); u_printString("\n");
+    u_printString("free bytes:   "); u_printHexInteger(totalAvailableBytes()); u_printString("\n");
+    u_printString("free list size: "); u_printInteger(listSize); u_printString("\n");
+
+    u_printString("--- Free list slabs ---\n");
+    MMD* start = iteratorAddress;
+    MMD* cur = start;
+    uint32 i = 0;
+    do
+    {
+        u_printString("  ["); u_printInteger(i); u_printString("] addr=");
+        u_printHexInteger((uint64)cur);
+        u_printString(" size="); u_printInteger(cur->size);
+        u_printString(" blocks ("); u_printHexInteger((uint64)cur->size * MEM_BLOCK_SIZE); u_printString(" bytes)\n");
+        cur = cur->getNext();
+        i++;
+    } while (cur != start);
+
+    u_printString("===========================\n");
+}
+
 int MemoryAllocator::deallocate(char* address)
 {
     auto fmmd = (MMD*)address - 1;
