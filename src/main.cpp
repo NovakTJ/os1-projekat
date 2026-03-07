@@ -68,7 +68,7 @@ int main()
     MemoryAllocator::init();
     Riscv::w_stvec((uint64) &Riscv::supervisorTrap);
 
-    nonPreemptiveTestMain();
+    finalMain();
 
     return 0;
 }
