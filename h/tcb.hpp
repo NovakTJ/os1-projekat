@@ -39,6 +39,8 @@ public:
 
     static void exit();
 
+    static int createNonPreemptive(TCB ** handle, BodyWithArg body, void* arg);
+
     static TCB *running;
 
 private:
@@ -86,6 +88,8 @@ private:
     friend class Riscv;
 
     static void threadWrapper();
+
+    static void nonPreemptiveWrapper();
 
     static void contextSwitch(Context *oldContext, Context *runningContext);
 

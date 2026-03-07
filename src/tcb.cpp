@@ -45,9 +45,25 @@ void TCB::urosDispatch()
     // else: queue empty, keep running current thread
 }
 
+int TCB::createNonPreemptive(TCB ** handle, BodyWithArg body, void* arg)
+{
+    *handle = new TCB(body, arg, TIME_SLICE);
+    if (*handle == nullptr) return -1;
+    (*handle)->context.ra = (uint64)&nonPreemptiveWrapper;
+    return 0;
+}
+
 void TCB::threadWrapper()
 {
     Riscv::popSppSpie(); //brings down the priv level with sret black magic
     running->body(running->arg); //does the fn
+    thread_exit();
+}
+
+void TCB::nonPreemptiveWrapper()
+{
+    Riscv::mc_sstatus(Riscv::SSTATUS_SPIE);
+    Riscv::popSppSpie();
+    running->body(running->arg);
     thread_exit();
 }
