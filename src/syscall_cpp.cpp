@@ -6,7 +6,6 @@ Thread::Thread(void (*body)(void*), void* arg)
     : myHandle(nullptr), body(body), arg(arg) {}
 
 void runWrapper(void* self) { ((Thread*)self)->run(); }
-
 Thread::Thread()
     : myHandle(nullptr), body(runWrapper), arg(this) {}
 

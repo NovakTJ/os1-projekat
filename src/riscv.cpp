@@ -139,7 +139,8 @@ void Riscv::handleSupervisorTrap()
     else if (scause == 0x8000000000000009UL)
     {
         // interrupt: yes; cause code: supervisor external interrupt (PLIC; could be keyboard)
-        console_handler();
+        //console_handler();
+        //append to inputbuffer, signal() to input semaphore.
     }
     else
     {

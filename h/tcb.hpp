@@ -9,6 +9,7 @@
 #include "../h/MemoryAllocator.h"
 #include "scheduler.hpp"
 
+
 // Thread Control Block
 class TCB
 {
@@ -43,6 +44,7 @@ public:
 
     static TCB *running;
 
+    static void OThreadBody(void* arg);
 
 private:
     // Kernel-internal constructor: allocates stack
