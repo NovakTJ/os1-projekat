@@ -8,8 +8,8 @@
 #include "../h/riscv.hpp"
 
 #include "../h/MemoryAllocator.h"
+#include "../h/syscall_c.h"
 #include "../lib/console.h"
-#include "../lib/mem.h"
 
 // --- Memory allocator stress tests ---
 

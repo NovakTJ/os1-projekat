@@ -11,7 +11,7 @@ class Riscv
 {
 public:
 
-    static uint64 ecall(uint64 opcode, uint64 arg1=0, uint64 arg2=0, uint64 arg3=0);
+    static uint64 ecall(uint64 opcode, uint64 arg1=0, uint64 arg2=0, uint64 arg3=0,  uint64 arg4=0);
     // pop sstatus.spp and sstatus.spie bits (has to be a non inline function)
     static void popSppSpie();
 

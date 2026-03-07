@@ -11,7 +11,6 @@
 //TODO: delete
 #include "../h/MemoryAllocator.h"
 #include "../lib/console.h"
-#include "../lib/mem.h"
 extern void urosThreadTest();
 extern void testHeavyMemory();
 

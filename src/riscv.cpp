@@ -61,7 +61,7 @@ void Riscv::handleSupervisorTrap()
             break;
         }
         case 0x12: { // thread_exit
-                running->setFinished(True);
+            TCB::running->setFinished(true);
             TCB::urosDispatch();
             printString("massive error: dead thread walks again\n");
             hasReturnValue = false;

@@ -1,7 +1,6 @@
 #include"../h/MemoryAllocator.h"
 #include"../h/print.hpp"
 #include"../h/riscv.hpp"
-#include"../lib/mem.h"
 
 // Known bugs:
 // - totalAvailableBlocks may underflow under extreme stress (unsigned wrap)

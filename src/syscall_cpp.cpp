@@ -15,6 +15,7 @@ int Thread::start() {
         return thread_create(&myHandle, body, arg);
     } else {
         //TODO: what then
+        return 1;
     }
 }
 

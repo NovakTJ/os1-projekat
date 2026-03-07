@@ -9,7 +9,7 @@ class TCB;
 
 class _sem {
 public:
-    void* operator new(size_t size) { return MemoryAllocator::allocate(size); }
+    void* operator new(size_t size) { return MemoryAllocator::allocateBytes(size); }
     void operator delete(void* ptr) { MemoryAllocator::deallocate((char*)ptr); }
 
     _sem(unsigned init = 1);

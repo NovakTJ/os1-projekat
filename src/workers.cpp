@@ -5,7 +5,7 @@
 #include "../lib/hw.h"
 #include "../h/tcb.hpp"
 #include "../h/print.hpp"
-
+#include "../h/syscall_c.h"
 void workerBodyA(void* aa)
 {
     for (uint64 i = 0; i < 10; i++)

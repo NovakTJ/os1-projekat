@@ -6,8 +6,7 @@
 #define OS1_PROJEKAT_MEMORYALLOCATOR_H
 #include"../lib/hw.h"
 
-
-//TODO: where the fuck is neededBytes
+//TODO: test then merge into master
 struct MMD
 {
     uint32 size; //number of blocks, including the next metadata.
