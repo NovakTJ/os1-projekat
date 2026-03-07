@@ -77,6 +77,13 @@ void Riscv::handleSupervisorTrap()
                 hasReturnValue = false;
                 break;
         }
+        case 0x41: // getc
+            syscallReturnValue = (uint64)__getc();
+            break;
+        case 0x42: // putc
+            __putc((char)arg1);
+            hasReturnValue = false;
+            break;
         case 0x21: // sem_open
             syscallReturnValue = (uint64)_sem::open((_sem**)arg1, (unsigned)arg2);
             break;
