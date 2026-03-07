@@ -118,8 +118,8 @@ void bigblocktest()
     int t = MemoryAllocator::totalAvailableBytes();
     u_printHexInteger(t);
     u_printHexInteger(MemoryAllocator::totalAvailableBytes());u_printString("\n");
-    auto a = mem_alloc(t/2-10);
-    auto b = mem_alloc(t/2-10);
+    auto a = mem_alloc(t/2-100);
+    auto b = mem_alloc(t/2-100);
     u_printHexInteger(MemoryAllocator::totalAvailableBytes());u_printString("\n");
 
     mem_free(a);
