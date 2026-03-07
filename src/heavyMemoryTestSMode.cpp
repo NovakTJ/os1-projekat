@@ -21,17 +21,17 @@ void recursiveAllocTestWPrint(int depth, int maxDepth) {
 
     size_t size = 100 + depth * 50; // big blocks: 100, 150, 200, 250
     if (size > MemoryAllocator::totalAvailableBytes()) {
-        printString("  skip d");
-        printInteger(depth);
-        printString(" (no mem)\n");
+        printKString("  skip d");
+        printKInteger(depth);
+        printKString(" (no mem)\n");
         return;
     }
 
     void* ptr = mem_alloc(size);
     if (!ptr) {
-        printString("  FAIL@d");
-        printInteger(depth);
-        printString("\n");
+        printKString("  FAIL@d");
+        printKInteger(depth);
+        printKString("\n");
         return;
     }
 
@@ -40,9 +40,9 @@ void recursiveAllocTestWPrint(int depth, int maxDepth) {
     for (size_t i = 0; i < 64; i++) // just check first block worth
         p[i] = (char)(depth * 7 + i);
 
-    printString("  A(");
-    printInteger(size);
-    printString(") ");
+    printKString("  A(");
+    printKInteger(size);
+    printKString(") ");
 
     recursiveAllocTestWPrint(depth + 1, maxDepth);
 
@@ -51,7 +51,7 @@ void recursiveAllocTestWPrint(int depth, int maxDepth) {
     for (size_t i = 0; i < 64; i++) {
         if (p[i] != (char)(depth * 7 + i)) { ok = false; break; }
     }
-    printString(ok ? "ok " : "CORRUPT ");
+    printKString(ok ? "ok " : "CORRUPT ");
 
     mem_free(ptr);
 }
@@ -64,34 +64,34 @@ void fragmentationTestWPrint() {
     void* ptrs[N];
 
     if (BLOCK_SZ * N > MemoryAllocator::totalAvailableBytes()) {
-        printString("  skip (not enough mem)\n");
+        printKString("  skip (not enough mem)\n");
         return;
     }
 
-    printString("  alloc ");
+    printKString("  alloc ");
     for (int i = 0; i < N; i++) {
         ptrs[i] = mem_alloc(BLOCK_SZ);
         __putc(ptrs[i] ? '+' : 'X');
     }
 
-    printString(" holes ");
+    printKString(" holes ");
     for (int i = 1; i < N; i += 2) {
         mem_free(ptrs[i]);
         ptrs[i] = nullptr;
         __putc('-');
     }
 
-    printString(" refill ");
+    printKString(" refill ");
     for (int i = 1; i < N; i += 2) {
         ptrs[i] = mem_alloc(BLOCK_SZ);
         __putc(ptrs[i] ? '+' : 'X');
     }
 
-    printString(" cleanup ");
+    printKString(" cleanup ");
     for (int i = N - 1; i >= 0; i--) {
         if (ptrs[i]) { mem_free(ptrs[i]); __putc('-'); }
     }
-    printString(" OK\n");
+    printKString(" OK\n");
 }
 
 // Binary-tree alloc pattern (depth=3, 7 allocs with big blocks).
@@ -118,41 +118,41 @@ void treeAllocTestWPrint(int depth) {
 void bigblocktestWPrint()
 {
     int t = MemoryAllocator::totalAvailableBytes();
-    printHexInteger(t);
-    printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
+    printKHexInteger(t);
+    printKHexInteger(MemoryAllocator::totalAvailableBytes());printKString("\n");
     auto a = mem_alloc(t/2-10);
     auto b = mem_alloc(t/2-10);
-    printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
+    printKHexInteger(MemoryAllocator::totalAvailableBytes());printKString("\n");
 
-    if (!a || !b) printString("FAIL");
-    mem_free(a);    if (!a || !b) printString("FAIL");
+    if (!a || !b) printKString("FAIL");
+    mem_free(a);    if (!a || !b) printKString("FAIL");
 
-    mem_free(b);    if (!a || !b) printString("FAIL");
-    printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
+    mem_free(b);    if (!a || !b) printKString("FAIL");
+    printKHexInteger(MemoryAllocator::totalAvailableBytes());printKString("\n");
 
-    a = mem_alloc(t*2/3);    if (!a || !b) printString("FAIL");
+    a = mem_alloc(t*2/3);    if (!a || !b) printKString("FAIL");
 
-    b = mem_alloc(t/5);    if (!a || !b) printString("FAIL");
-    printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
+    b = mem_alloc(t/5);    if (!a || !b) printKString("FAIL");
+    printKHexInteger(MemoryAllocator::totalAvailableBytes());printKString("\n");
 
-    mem_free(a);    if (!a || !b) printString("FAIL");
+    mem_free(a);    if (!a || !b) printKString("FAIL");
 
-    a = mem_alloc(t*2/3-5);    if (!a || !b) printString("FAIL");
+    a = mem_alloc(t*2/3-5);    if (!a || !b) printKString("FAIL");
 
-    mem_free(b);    if (!a || !b) printString("FAIL");
+    mem_free(b);    if (!a || !b) printKString("FAIL");
 
-    b = mem_alloc(t/5);    if (!a || !b) printString("FAIL");
-    printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
+    b = mem_alloc(t/5);    if (!a || !b) printKString("FAIL");
+    printKHexInteger(MemoryAllocator::totalAvailableBytes());printKString("\n");
 
-    auto c = mem_alloc(1);    if (!a || !b || !c) printString("FAIL");
-    printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
+    auto c = mem_alloc(1);    if (!a || !b || !c) printKString("FAIL");
+    printKHexInteger(MemoryAllocator::totalAvailableBytes());printKString("\n");
 
-    mem_free(a);    if (!a || !b || !c) printString("FAIL");
+    mem_free(a);    if (!a || !b || !c) printKString("FAIL");
 
-    mem_free(b);    if (!a || !b || !c) printString("FAIL");
+    mem_free(b);    if (!a || !b || !c) printKString("FAIL");
 
-    mem_free(c);    if (!a || !b || !c) printString("FAIL");
-    printHexInteger(MemoryAllocator::totalAvailableBytes());printString("\n");
+    mem_free(c);    if (!a || !b || !c) printKString("FAIL");
+    printKHexInteger(MemoryAllocator::totalAvailableBytes());printKString("\n");
 
 }
 // Coalescing test: alloc three large adjacent blocks, free middle then
@@ -160,14 +160,14 @@ void bigblocktestWPrint()
 void coalesceTestWPrint() {
     size_t chunkSz = 200;
     if (chunkSz * 3 > MemoryAllocator::totalAvailableBytes()) {
-        printString("  skip (not enough mem)\n");
+        printKString("  skip (not enough mem)\n");
         return;
     }
 
     void* a = mem_alloc(chunkSz);
     void* b = mem_alloc(chunkSz);
     void* c = mem_alloc(chunkSz);
-    printString("  abc allocated ");
+    printKString("  abc allocated ");
 
     mem_free(b);
     __putc('1');
@@ -180,46 +180,46 @@ void coalesceTestWPrint() {
     size_t bigSz = MemoryAllocator::totalAvailableBytes() / 2;
     void* big = mem_alloc(bigSz);
     if (big) {
-        printString(" big(");
-        printInteger(bigSz);
-        printString(")=OK");
+        printKString(" big(");
+        printKInteger(bigSz);
+        printKString(")=OK");
         mem_free(big);
     } else {
-        printString(" big=FAIL");
+        printKString(" big=FAIL");
     }
-    printString("\n");
+    printKString("\n");
 }
 
 void testHeavyMemory123WPrint()
 {
-    printString("=== Mem Alloc Stress Tests 1-3 ===\n");
-    printString("Available blocks: ");
-    printInteger(MemoryAllocator::totalAvailableBytes());
-    printString("\n");
+    printKString("=== Mem Alloc Stress Tests 1-3 ===\n");
+    printKString("Available blocks: ");
+    printKInteger(MemoryAllocator::totalAvailableBytes());
+    printKString("\n");
 
-    printString("[1] Recursive alloc/free (4 levels, big blocks):\n");
+    printKString("[1] Recursive alloc/free (4 levels, big blocks):\n");
     recursiveAllocTestWPrint(0, 4);
-    printString("\n  PASS\n");
+    printKString("\n  PASS\n");
 
-    printString("[2] Fragmentation (8 x 50-block chunks):\n");
+    printKString("[2] Fragmentation (8 x 50-block chunks):\n");
     fragmentationTestWPrint();
 
-    printString("[3] Tree alloc (depth=3, 7 big allocs):\n  ");
+    printKString("[3] Tree alloc (depth=3, 7 big allocs):\n  ");
     treeAllocTestWPrint(3);
-    printString("\n  PASS\n");
+    printKString("\n  PASS\n");
 
-    printString("=== Tests 1-3 done ===\n");
+    printKString("=== Tests 1-3 done ===\n");
 }
 
 void testHeavyMemory4WPrint()
 {
-    printString("=== Mem Alloc Stress Test 4 ===\n");
-    printString("Available blocks: ");
-    printInteger(MemoryAllocator::totalAvailableBytes());
-    printString("\n");
+    printKString("=== Mem Alloc Stress Test 4 ===\n");
+    printKString("Available blocks: ");
+    printKInteger(MemoryAllocator::totalAvailableBytes());
+    printKString("\n");
 
-    printString("[4] big block test\n");
+    printKString("[4] big block test\n");
     bigblocktestWPrint();
 
-    printString("=== Test 4 done ===\n");
+    printKString("=== Test 4 done ===\n");
 }

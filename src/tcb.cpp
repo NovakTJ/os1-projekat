@@ -33,7 +33,7 @@ TCB* TCB::createForCurrent()
 
 
 
-void TCB::urosDispatch()
+void TCB::kDispatch()
 {
     TCB *old = running;
     if (!old->isFinished()) { Scheduler::put(old); }

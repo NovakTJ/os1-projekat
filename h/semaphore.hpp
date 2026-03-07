@@ -22,6 +22,7 @@ public:
     int signal();
 
 private:
+    bool works;
     int value;
     List<TCB> blockedQueue;
 };

@@ -6,7 +6,7 @@ extern "C" {
 
     void __putc(char chr);
 
-    char __getc();
+    //char __getc();
 
     void console_handler();
 

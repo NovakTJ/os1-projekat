@@ -62,8 +62,8 @@ void Riscv::handleSupervisorTrap()
         }
         case 0x12: { // thread_exit
             TCB::running->setFinished(true);
-            TCB::urosDispatch();
-            printString("massive error: dead thread walks again\n");
+            TCB::kDispatch();
+            printKString("massive error: dead thread walks again\n");
             hasReturnValue = false;
         }
         case 0x13:{
@@ -71,14 +71,17 @@ void Riscv::handleSupervisorTrap()
                 uint64 volatile sepc = r_sepc();
                 uint64 volatile sstatus = r_sstatus();
                 TCB::timeSliceCounter = 0;
-                TCB::urosDispatch(); //execution stops and later continues here, in contextSwitch.S
+                TCB::kDispatch(); //execution stops and later continues here, in contextSwitch.S
                 w_sstatus(sstatus);
                 w_sepc(sepc);
                 hasReturnValue = false;
                 break;
         }
         case 0x41: // getc
-            syscallReturnValue = (uint64)__getc();
+            // TODO: implement proper input buffer filled by console_handler interrupt
+            // __getc() uses xv6's console_read/sleep which is incompatible with our kernel
+            // syscallReturnValue = (uint64)__getc();
+            syscallReturnValue = 0;
             break;
         case 0x42: // putc
             __putc((char)arg1);
@@ -105,11 +108,11 @@ void Riscv::handleSupervisorTrap()
         default:
             hasReturnValue = false;
             __asm__ volatile("addi x1, x1, 0"); //noop
-            printString("unexpected a0 (prob. 0), sepc=");
-            printHexInteger(r_sepc());
-            printString(" opcode=");
-            printHexInteger(opcode);
-            printString("\n");
+            printKString("unexpected a0 (prob. 0), sepc=");
+            printKHexInteger(r_sepc());
+            printKString(" opcode=");
+            printKHexInteger(opcode);
+            printKString("\n");
             break;
         }
         w_sepc(r_sepc() + 4);
@@ -128,7 +131,7 @@ void Riscv::handleSupervisorTrap()
             uint64 volatile sepc = r_sepc();
             uint64 volatile sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
-            TCB::urosDispatch();  //execution stops and later continues here, in contextSwitch.S
+            TCB::kDispatch();  //execution stops and later continues here, in contextSwitch.S
             w_sstatus(sstatus);
             w_sepc(sepc);
         }
@@ -140,9 +143,9 @@ void Riscv::handleSupervisorTrap()
     }
     else
     {
-        printString("unexpected scause (prob. 2), sepc=");
-        printHexInteger(r_sepc());
-            printString("\n");
+        printKString("unexpected scause (prob. 2), sepc=");
+        printKHexInteger(r_sepc());
+            printKString("\n");
 
     }
 }

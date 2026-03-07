@@ -21,17 +21,17 @@ void recursiveAllocTest(int depth, int maxDepth) {
 
     size_t size = 100 + depth * 50; // big blocks: 100, 150, 200, 250
     if (size > MemoryAllocator::totalAvailableBytes()) {
-        u_printString("  skip d");
-        u_printInteger(depth);
-        u_printString(" (no mem)\n");
+        printUString("  skip d");
+        printUInteger(depth);
+        printUString(" (no mem)\n");
         return;
     }
 
     void* ptr = mem_alloc(size);
     if (!ptr) {
-        u_printString("  FAIL@d");
-        u_printInteger(depth);
-        u_printString("\n");
+        printUString("  FAIL@d");
+        printUInteger(depth);
+        printUString("\n");
         return;
     }
 
@@ -40,9 +40,9 @@ void recursiveAllocTest(int depth, int maxDepth) {
     for (size_t i = 0; i < 64; i++) // just check first block worth
         p[i] = (char)(depth * 7 + i);
 
-    u_printString("  A(");
-    u_printInteger(size);
-    u_printString(") ");
+    printUString("  A(");
+    printUInteger(size);
+    printUString(") ");
 
     recursiveAllocTest(depth + 1, maxDepth);
 
@@ -62,34 +62,34 @@ void fragmentationTest() {
     void* ptrs[N];
 
     if (BLOCK_SZ * N > MemoryAllocator::totalAvailableBytes()) {
-        u_printString("  skip (not enough mem)\n");
+        printUString("  skip (not enough mem)\n");
         return;
     }
 
-    u_printString("  alloc ");
+    printUString("  alloc ");
     for (int i = 0; i < N; i++) {
         ptrs[i] = mem_alloc(BLOCK_SZ);
-        ptrs[i] ? u_printString("+") : u_printString("X");
+        ptrs[i] ? printUString("+") : printUString("X");
     }
 
-    u_printString(" holes ");
+    printUString(" holes ");
     for (int i = 1; i < N; i += 2) {
         mem_free(ptrs[i]);
         ptrs[i] = nullptr;
-        u_printString("-");
+        printUString("-");
     }
 
-    u_printString(" refill ");
+    printUString(" refill ");
     for (int i = 1; i < N; i += 2) {
         ptrs[i] = mem_alloc(BLOCK_SZ);
-        ptrs[i] ? u_printString("+") : u_printString("X");
+        ptrs[i] ? printUString("+") : printUString("X");
     }
 
-    u_printString(" cleanup ");
+    printUString(" cleanup ");
     for (int i = N - 1; i >= 0; i--) {
-        if (ptrs[i]) { mem_free(ptrs[i]); u_printString("-"); }
+        if (ptrs[i]) { mem_free(ptrs[i]); printUString("-"); }
     }
-    u_printString(" OK\n");
+    printUString(" OK\n");
 }
 
 // Binary-tree alloc pattern (depth=3, 7 allocs with big blocks).
@@ -99,28 +99,28 @@ void treeAllocTest(int depth) {
 
     size_t size = depth * 80; // 240, 160, 80
     if (size > MemoryAllocator::totalAvailableBytes()) {
-        u_printString("X");
+        printUString("X");
         return;
     }
 
     void* ptr = mem_alloc(size);
-    if (!ptr) { u_printString("X"); return; }
-    u_printString("(");
+    if (!ptr) { printUString("X"); return; }
+    printUString("(");
 
     treeAllocTest(depth - 1);
     treeAllocTest(depth - 1);
 
     mem_free(ptr);
-    u_printString(")");
+    printUString(")");
 }
 void bigblocktest()
 {
     int t = MemoryAllocator::totalAvailableBytes();
-    u_printHexInteger(t);
-    u_printHexInteger(MemoryAllocator::totalAvailableBytes());u_printString("\n");
+    printUHexInteger(t);
+    printUHexInteger(MemoryAllocator::totalAvailableBytes());printUString("\n");
     auto a = mem_alloc(t/2-100);
     auto b = mem_alloc(t/2-100);
-    u_printHexInteger(MemoryAllocator::totalAvailableBytes());u_printString("\n");
+    printUHexInteger(MemoryAllocator::totalAvailableBytes());printUString("\n");
 
     mem_free(a);
 
@@ -152,66 +152,66 @@ void bigblocktest()
 void coalesceTest() {
     size_t chunkSz = 200;
     if (chunkSz * 3 > MemoryAllocator::totalAvailableBytes()) {
-        u_printString("  skip (not enough mem)\n");
+        printUString("  skip (not enough mem)\n");
         return;
     }
 
     void* a = mem_alloc(chunkSz);
     void* b = mem_alloc(chunkSz);
     void* c = mem_alloc(chunkSz);
-    u_printString("  abc allocated ");
+    printUString("  abc allocated ");
 
     mem_free(b);
-    u_printString("1");
+    printUString("1");
     mem_free(a);
-    u_printString("2");
+    printUString("2");
     mem_free(c);
-    u_printString("3");
+    printUString("3");
 
     // Everything should be coalesced; try a large alloc
     size_t bigSz = MemoryAllocator::totalAvailableBytes() / 2;
     void* big = mem_alloc(bigSz);
     if (big) {
-        u_printString(" big(");
-        u_printInteger(bigSz);
-        u_printString(")=OK");
+        printUString(" big(");
+        printUInteger(bigSz);
+        printUString(")=OK");
         mem_free(big);
     } else {
-        u_printString(" big=FAIL");
+        printUString(" big=FAIL");
     }
-    u_printString("\n");
+    printUString("\n");
 }
 
 void testHeavyMemory123()
 {
-    u_printString("=== Mem Alloc Stress Tests 1-3 ===\n");
-    u_printString("Available blocks: ");
-    u_printInteger(MemoryAllocator::totalAvailableBytes());
-    u_printString("\n");
+    printUString("=== Mem Alloc Stress Tests 1-3 ===\n");
+    printUString("Available blocks: ");
+    printUInteger(MemoryAllocator::totalAvailableBytes());
+    printUString("\n");
 
-    u_printString("[1] Recursive alloc/free (4 levels, big blocks):\n");
+    printUString("[1] Recursive alloc/free (4 levels, big blocks):\n");
     recursiveAllocTest(0, 4);
-    u_printString("\n  PASS\n");
+    printUString("\n  PASS\n");
 
-    u_printString("[2] Fragmentation (8 x 50-block chunks):\n");
+    printUString("[2] Fragmentation (8 x 50-block chunks):\n");
     fragmentationTest();
 
-    u_printString("[3] Tree alloc (depth=3, 7 big allocs):\n  ");
+    printUString("[3] Tree alloc (depth=3, 7 big allocs):\n  ");
     treeAllocTest(3);
-    u_printString("\n  PASS\n");
+    printUString("\n  PASS\n");
 
-    u_printString("=== Tests 1-3 done ===\n");
+    printUString("=== Tests 1-3 done ===\n");
 }
 
 void testHeavyMemory4()
 {
-    u_printString("=== Mem Alloc Stress Test 4 ===\n");
-    u_printString("Available blocks: ");
-    u_printInteger(MemoryAllocator::totalAvailableBytes());
-    u_printString("\n");
+    printUString("=== Mem Alloc Stress Test 4 ===\n");
+    printUString("Available blocks: ");
+    printUInteger(MemoryAllocator::totalAvailableBytes());
+    printUString("\n");
 
-    u_printString("[4] big block test\n");
+    printUString("[4] big block test\n");
     bigblocktest();
 
-    u_printString("=== Test 4 done ===\n");
+    printUString("=== Test 4 done ===\n");
 }

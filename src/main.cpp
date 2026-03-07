@@ -31,7 +31,7 @@ void finalMain(){
     Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
 
     while (!userThread->isFinished()) {
-        TCB::urosDispatch();
+        TCB::kDispatch();
     }
 
     delete userThread;
@@ -47,7 +47,7 @@ void nonPreemptiveTestMain(){
     TCB::createNonPreemptive(&test123, heavyMemory123Wrapper, nullptr);
 
     while (!test123->isFinished()) {
-        TCB::urosDispatch();
+        TCB::kDispatch();
     }
     delete test123;
 
@@ -56,7 +56,7 @@ void nonPreemptiveTestMain(){
     TCB::createNonPreemptive(&test4, heavyMemory4Wrapper, nullptr);
 
     while (!test4->isFinished()) {
-        TCB::urosDispatch();
+        TCB::kDispatch();
     }
     delete test4;
 

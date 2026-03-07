@@ -35,13 +35,14 @@ public:
     // Creates a bare TCB for the already-running thread (no stack alloc, no wrapper, no scheduler)
     static TCB* createForCurrent();
 
-    static void urosDispatch();
+    static void kDispatch();
 
     static void exit();
 
     static int createNonPreemptive(TCB ** handle, BodyWithArg body, void* arg);
 
     static TCB *running;
+
 
 private:
     // Kernel-internal constructor: allocates stack
@@ -72,16 +73,20 @@ private:
         if (body != nullptr) { Scheduler::put(this); }
     }
 
+
+
+    BodyWithArg body;
+    void* arg;
+    uint64 *stack;
+public:
     struct Context //the rest of the context is kept on the stack
     {
         uint64 ra;
         uint64 sp;
     };
-
-    BodyWithArg body;
-    void* arg;
-    uint64 *stack;
     Context context;
+    static void contextSwitch(Context *oldContext, Context *runningContext);
+private:
     uint64 timeSlice;
     bool finished;
 
@@ -91,7 +96,6 @@ private:
 
     static void nonPreemptiveWrapper();
 
-    static void contextSwitch(Context *oldContext, Context *runningContext);
 
     static uint64 timeSliceCounter;
 

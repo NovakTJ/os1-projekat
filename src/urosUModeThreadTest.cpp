@@ -13,25 +13,25 @@ static volatile int exitTestPassed;
 static void u_workerExit(void* arg) {
     for (uint64 i = 0; i < 6; i++) {
         if (i == 3) {
-            u_printString("E: calling thread_exit at i=3\n");
+            printUString("E: calling thread_exit at i=3\n");
             exitTestPassed = 1;
             thread_exit();
             // should never reach here
-            u_printString("E: ERROR - thread_exit did not terminate thread!\n");
+            printUString("E: ERROR - thread_exit did not terminate thread!\n");
             exitTestPassed = 0;
         }
-        u_printString("E: i=");
-        u_printInteger(i);
-        u_printString("\n");
+        printUString("E: i=");
+        printUInteger(i);
+        printUString("\n");
     }
     exitTestPassed = 0; // should never reach here either
 }
 
 static void u_workerA(void* arg) {
     for (uint64 i = 0; i < 10; i++) {
-        u_printString("A: i=");
-        u_printInteger(i);
-        u_printString("\n");
+        printUString("A: i=");
+        printUInteger(i);
+        printUString("\n");
         for (uint64 j = 0; j < 10000; j++)
             for (uint64 k = 0; k < 30000; k++) {}
     }
@@ -40,9 +40,9 @@ static void u_workerA(void* arg) {
 
 static void u_workerB(void* arg) {
     for (uint64 i = 0; i < 16; i++) {
-        u_printString("B: i=");
-        u_printInteger(i);
-        u_printString("\n");
+        printUString("B: i=");
+        printUInteger(i);
+        printUString("\n");
         for (uint64 j = 0; j < 10000; j++)
             for (uint64 k = 0; k < 30000; k++) {}
     }
@@ -58,31 +58,31 @@ static uint64 fibonacci(uint64 n) {
 static void u_workerC(void* arg) {
     uint8 i = 0;
     for (; i < 3; i++) {
-        u_printString("C: i=");
-        u_printInteger(i);
-        u_printString("\n");
+        printUString("C: i=");
+        printUInteger(i);
+        printUString("\n");
     }
 
-    u_printString("C: yield\n");
+    printUString("C: yield\n");
     __asm__ ("li t1, 7");
     thread_dispatch();
 
     uint64 t1 = 0;
     __asm__ ("mv %[t1], t1" : [t1] "=r"(t1));
 
-    u_printString("C: t1=");
-    u_printInteger(t1);
-    u_printString("\n");
+    printUString("C: t1=");
+    printUInteger(t1);
+    printUString("\n");
 
     uint64 result = fibonacci(12);
-    u_printString("C: fibonaci=");
-    u_printInteger(result);
-    u_printString("\n");
+    printUString("C: fibonaci=");
+    printUInteger(result);
+    printUString("\n");
 
     for (; i < 6; i++) {
-        u_printString("C: i=");
-        u_printInteger(i);
-        u_printString("\n");
+        printUString("C: i=");
+        printUInteger(i);
+        printUString("\n");
     }
     finishedCount++;
 }
@@ -90,31 +90,31 @@ static void u_workerC(void* arg) {
 static void u_workerD(void* arg) {
     uint8 i = 10;
     for (; i < 13; i++) {
-        u_printString("D: i=");
-        u_printInteger(i);
-        u_printString("\n");
+        printUString("D: i=");
+        printUInteger(i);
+        printUString("\n");
     }
 
-    u_printString("D: yield\n");
+    printUString("D: yield\n");
     __asm__ ("li t1, 5");
     thread_dispatch();
 
     uint64 result = fibonacci(16);
-    u_printString("D: fibonaci=");
-    u_printInteger(result);
-    u_printString("\n");
+    printUString("D: fibonaci=");
+    printUInteger(result);
+    printUString("\n");
 
     for (; i < 16; i++) {
-        u_printString("D: i=");
-        u_printInteger(i);
-        u_printString("\n");
+        printUString("D: i=");
+        printUInteger(i);
+        printUString("\n");
     }
     finishedCount++;
 }
 
 void urosUModeThreadTest() {
     // --- thread_exit test ---
-    u_printString("=== thread_exit test ===\n");
+    printUString("=== thread_exit test ===\n");
     exitTestPassed = 0;
     thread_t exitThread;
     thread_create(&exitThread, u_workerExit, nullptr);
@@ -126,68 +126,68 @@ void urosUModeThreadTest() {
     thread_dispatch();
     thread_dispatch();
     if (exitTestPassed == 1)
-        u_printString("thread_exit: PASSED\n");
+        printUString("thread_exit: PASSED\n");
     else
-        u_printString("thread_exit: FAILED\n");
+        printUString("thread_exit: FAILED\n");
 
     // --- mem_alloc / mem_free test ---
-    u_printString("=== mem_alloc/mem_free test ===\n");
+    printUString("=== mem_alloc/mem_free test ===\n");
     size_t freeBefore = mem_get_free_space();
-    u_printString("Free before alloc: ");
-    u_printInteger(freeBefore);
-    u_printString("\n");
+    printUString("Free before alloc: ");
+    printUInteger(freeBefore);
+    printUString("\n");
 
     void* block = mem_alloc(1024);
     if (block) {
-        u_printString("Allocated 1024 bytes at ");
-        u_printHexInteger((uint64)block);
-        u_printString("\n");
+        printUString("Allocated 1024 bytes at ");
+        printUHexInteger((uint64)block);
+        printUString("\n");
 
         // write and read back to verify the memory works
         char* p = (char*)block;
         p[0] = 'O'; p[1] = 'K';
         if (p[0] == 'O' && p[1] == 'K')
-            u_printString("mem read/write: PASSED\n");
+            printUString("mem read/write: PASSED\n");
         else
-            u_printString("mem read/write: FAILED\n");
+            printUString("mem read/write: FAILED\n");
 
         size_t freeAfter = mem_get_free_space();
-        u_printString("Free after alloc: ");
-        u_printInteger(freeAfter);
-        u_printString("\n");
+        printUString("Free after alloc: ");
+        printUInteger(freeAfter);
+        printUString("\n");
 
         int freeResult = mem_free(block);
         size_t freeAfterFree = mem_get_free_space();
-        u_printString("Free after free:  ");
-        u_printInteger(freeAfterFree);
-        u_printString("\n");
+        printUString("Free after free:  ");
+        printUInteger(freeAfterFree);
+        printUString("\n");
 
         if (freeResult == 0 && freeAfterFree >= freeBefore)
-            u_printString("mem_alloc/mem_free: PASSED\n");
+            printUString("mem_alloc/mem_free: PASSED\n");
         else
-            u_printString("mem_alloc/mem_free: FAILED\n");
+            printUString("mem_alloc/mem_free: FAILED\n");
     } else {
-        u_printString("mem_alloc: FAILED (returned null)\n");
+        printUString("mem_alloc: FAILED (returned null)\n");
     }
 
     // --- thread test (A-D) ---
-    u_printString("=== thread create/dispatch test ===\n");
+    printUString("=== thread create/dispatch test ===\n");
     finishedCount = 0;
 
     thread_t threads[4];
 
     thread_create(&threads[0], u_workerA, nullptr);
-    u_printString("ThreadA created\n");
+    printUString("ThreadA created\n");
     thread_create(&threads[1], u_workerB, nullptr);
-    u_printString("ThreadB created\n");
+    printUString("ThreadB created\n");
     thread_create(&threads[2], u_workerC, nullptr);
-    u_printString("ThreadC created\n");
+    printUString("ThreadC created\n");
     thread_create(&threads[3], u_workerD, nullptr);
-    u_printString("ThreadD created\n");
+    printUString("ThreadD created\n");
 
     while (finishedCount < 4) {
         thread_dispatch();
     }
 
-    u_printString("=== all tests done ===\n");
+    printUString("=== all tests done ===\n");
 }

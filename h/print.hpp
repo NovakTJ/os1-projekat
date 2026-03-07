@@ -8,14 +8,14 @@
 #include "../lib/hw.h"
 
 // Kernel-mode (calls __putc directly, disables SIE for atomicity)
-extern void printString(char const *string);
-extern void printInteger(uint64 integer);
-extern void printHexInteger(uint64 integer);
+extern void printKString(char const *string);
+extern void printKInteger(uint64 integer);
+extern void printKHexInteger(uint64 integer);
 
 // User-mode (calls putc syscall)
 // TODO: add mutex/semaphore protection once semaphores are working
-extern void u_printString(char const *string);
-extern void u_printInteger(uint64 integer);
-extern void u_printHexInteger(uint64 integer);
+extern void printUString(char const *string);
+extern void printUInteger(uint64 integer);
+extern void printUHexInteger(uint64 integer);
 
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_PRINT_HPP

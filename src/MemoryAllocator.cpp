@@ -251,56 +251,56 @@ char* MemoryAllocator::allocateBlocks(size_t nBlocks)
 
 void MemoryAllocator::printInfo()
 {
-    printString("=== MemoryAllocator Info ===\n");
-    printString("startAddr: "); printHexInteger((uint64)startAddr); printString("\n");
-    printString("endAddr:   "); printHexInteger((uint64)endAddr); printString("\n");
-    printString("total blocks: "); printInteger((uint64)((endAddr - startAddr) / MEM_BLOCK_SIZE)); printString("\n");
-    printString("free blocks:  "); printInteger(totalAvailableBlocks); printString("\n");
-    printString("free bytes:   "); printHexInteger(totalAvailableBytes()); printString("\n");
-    printString("free list size: "); printInteger(listSize); printString("\n");
+    printKString("=== MemoryAllocator Info ===\n");
+    printKString("startAddr: "); printKHexInteger((uint64)startAddr); printKString("\n");
+    printKString("endAddr:   "); printKHexInteger((uint64)endAddr); printKString("\n");
+    printKString("total blocks: "); printKInteger((uint64)((endAddr - startAddr) / MEM_BLOCK_SIZE)); printKString("\n");
+    printKString("free blocks:  "); printKInteger(totalAvailableBlocks); printKString("\n");
+    printKString("free bytes:   "); printKHexInteger(totalAvailableBytes()); printKString("\n");
+    printKString("free list size: "); printKInteger(listSize); printKString("\n");
 
-    printString("--- Free list slabs ---\n");
+    printKString("--- Free list slabs ---\n");
     MMD* start = iteratorAddress;
     MMD* cur = start;
     uint32 i = 0;
     do
     {
-        printString("  ["); printInteger(i); printString("] addr=");
-        printHexInteger((uint64)cur);
-        printString(" size="); printInteger(cur->size);
-        printString(" blocks ("); printHexInteger((uint64)cur->size * MEM_BLOCK_SIZE); printString(" bytes)\n");
+        printKString("  ["); printKInteger(i); printKString("] addr=");
+        printKHexInteger((uint64)cur);
+        printKString(" size="); printKInteger(cur->size);
+        printKString(" blocks ("); printKHexInteger((uint64)cur->size * MEM_BLOCK_SIZE); printKString(" bytes)\n");
         cur = cur->getNext();
         i++;
     } while (cur != start);
 
-    printString("===========================\n");
+    printKString("===========================\n");
 }
 
 void MemoryAllocator::u_printInfo()
 {
-    u_printString("=== MemoryAllocator Info ===\n");
-    u_printString("startAddr: "); u_printHexInteger((uint64)startAddr); u_printString("\n");
-    u_printString("endAddr:   "); u_printHexInteger((uint64)endAddr); u_printString("\n");
-    u_printString("total blocks: "); u_printInteger((uint64)((endAddr - startAddr) / MEM_BLOCK_SIZE)); u_printString("\n");
-    u_printString("free blocks:  "); u_printInteger(totalAvailableBlocks); u_printString("\n");
-    u_printString("free bytes:   "); u_printHexInteger(totalAvailableBytes()); u_printString("\n");
-    u_printString("free list size: "); u_printInteger(listSize); u_printString("\n");
+    printUString("=== MemoryAllocator Info ===\n");
+    printUString("startAddr: "); printUHexInteger((uint64)startAddr); printUString("\n");
+    printUString("endAddr:   "); printUHexInteger((uint64)endAddr); printUString("\n");
+    printUString("total blocks: "); printUInteger((uint64)((endAddr - startAddr) / MEM_BLOCK_SIZE)); printUString("\n");
+    printUString("free blocks:  "); printUInteger(totalAvailableBlocks); printUString("\n");
+    printUString("free bytes:   "); printUHexInteger(totalAvailableBytes()); printUString("\n");
+    printUString("free list size: "); printUInteger(listSize); printUString("\n");
 
-    u_printString("--- Free list slabs ---\n");
+    printUString("--- Free list slabs ---\n");
     MMD* start = iteratorAddress;
     MMD* cur = start;
     uint32 i = 0;
     do
     {
-        u_printString("  ["); u_printInteger(i); u_printString("] addr=");
-        u_printHexInteger((uint64)cur);
-        u_printString(" size="); u_printInteger(cur->size);
-        u_printString(" blocks ("); u_printHexInteger((uint64)cur->size * MEM_BLOCK_SIZE); u_printString(" bytes)\n");
+        printUString("  ["); printUInteger(i); printUString("] addr=");
+        printUHexInteger((uint64)cur);
+        printUString(" size="); printUInteger(cur->size);
+        printUString(" blocks ("); printUHexInteger((uint64)cur->size * MEM_BLOCK_SIZE); printUString(" bytes)\n");
         cur = cur->getNext();
         i++;
     } while (cur != start);
 
-    u_printString("===========================\n");
+    printUString("===========================\n");
 }
 
 int MemoryAllocator::deallocate(char* address)
@@ -308,7 +308,7 @@ int MemoryAllocator::deallocate(char* address)
     auto fmmd = (MMD*)address - 1;
     if (!fmmd->isAllocated())
     {
-        printString("double free\n");
+        printKString("double free\n");
         printInfo();
         return -1;
     }

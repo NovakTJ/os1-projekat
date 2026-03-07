@@ -7,7 +7,7 @@
 #include "../h/syscall_c.h"
 #include "../lib/console.h"
 
-void printString(char const *string)
+void printKString(char const *string)
 {
     uint64 sstatus = Riscv::r_sstatus();
     Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
@@ -19,7 +19,7 @@ void printString(char const *string)
     Riscv::ms_sstatus(sstatus & Riscv::SSTATUS_SIE ? Riscv::SSTATUS_SIE : 0);
 }
 
-void printInteger(uint64 integer)
+void printKInteger(uint64 integer)
 {
     uint64 sstatus = Riscv::r_sstatus();
     Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
@@ -50,7 +50,7 @@ void printInteger(uint64 integer)
     Riscv::ms_sstatus(sstatus & Riscv::SSTATUS_SIE ? Riscv::SSTATUS_SIE : 0);
 }
 
-void printHexInteger(uint64 integer)
+void printKHexInteger(uint64 integer)
 {
     uint64 sstatus = Riscv::r_sstatus();
     Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
@@ -82,7 +82,7 @@ void printHexInteger(uint64 integer)
 // --- User-mode print functions (use putc syscall) ---
 // TODO: wrap in semaphore/mutex for thread safety once available
 
-void u_printString(char const *string)
+void printUString(char const *string)
 {
     while (*string != '\0')
     {
@@ -91,7 +91,7 @@ void u_printString(char const *string)
     }
 }
 
-void u_printInteger(uint64 integer)
+void printUInteger(uint64 integer)
 {
     static char digits[] = "0123456789";
     char buf[16];
@@ -119,7 +119,7 @@ void u_printInteger(uint64 integer)
     while (--i >= 0) { putc(buf[i]); }
 }
 
-void u_printHexInteger(uint64 integer)
+void printUHexInteger(uint64 integer)
 {
     static char digits[] = "0123456789abcdef";
     char buf[16];
