@@ -109,8 +109,12 @@ void MemoryAllocator::merge(MMD* mmd)
     mmd->size += aboveMmd->size;
     listSize--;
 }
-
-uint32 neededBlocks(size_t nBytes)
+size_t MemoryAllocator::neededBytes(size_t nBlocks)
+{
+    return (nBlocks-1)*MEM_BLOCK_SIZE + 1;
+    //
+}
+uint32 MemoryAllocator::neededBlocks(size_t nBytes)
 {
     size_t remainder = nBytes % MEM_BLOCK_SIZE;
     uint32 divResult = nBytes / MEM_BLOCK_SIZE;
@@ -181,7 +185,7 @@ MMD* MemoryAllocator::createFirstTwoSlabs()
     return bmmd;
 }
 
-char* MemoryAllocator::allocate(size_t nBlocks)
+char* MemoryAllocator::allocateBytes(size_t nBlocks)
 {
     size_t nBytes = nBlocks; //TODO: THIS IS TERRIBLE NOO
 
@@ -218,6 +222,11 @@ char* MemoryAllocator::allocate(size_t nBlocks)
         iteratorAddress = iteratorAddress->getNext();
         cmmd = iteratorAddress->getNext();
     }
+}
+
+char* MemoryAllocator::allocateBlocks(size_t nBlocks)
+{
+    return allocateBytes(neededBytes(nBlocks));
 }
 
 void MemoryAllocator::printInfo()

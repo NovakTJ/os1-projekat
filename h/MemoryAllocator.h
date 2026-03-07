@@ -22,7 +22,8 @@ class MemoryAllocator
 {
     public:
     static bool initialized;
-    static char* allocate(size_t nBlocks);
+    static char* allocateBytes(size_t nBytes);
+    static char* allocateBlocks(size_t nBlocks);
     static int deallocate(char* address);
 
     static char* startAddr;
@@ -36,6 +37,9 @@ class MemoryAllocator
     static size_t MMDSIZE;
     static void init();
     static void printInfo();
+
+    static size_t neededBytes(size_t nBlocks);
+    static uint32 neededBlocks(size_t nBytes);
 private:
     //terminology:
     //slab is the name for the contiguous space of memory that is one element in the list

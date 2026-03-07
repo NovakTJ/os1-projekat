@@ -13,7 +13,7 @@
 class TCB
 {
 public:
-    void* operator new(size_t size) { return MemoryAllocator::allocate(size); }
+    void* operator new(size_t size) { return MemoryAllocator::allocateBytes(size); }
     void operator delete(void* ptr) { MemoryAllocator::deallocate((char*)ptr); }
     ~TCB() { if (stack) MemoryAllocator::deallocate((char*)stack); }
 
@@ -41,7 +41,7 @@ private:
     TCB(BodyWithArg body, void* arg, uint64 timeSlice) :
             body(body),
             arg(arg),
-            stack(body != nullptr ? (uint64*)MemoryAllocator::allocate(STACK_SIZE * sizeof(uint64)) : nullptr),
+            stack(body != nullptr ? (uint64*)MemoryAllocator::allocateBytes(STACK_SIZE * sizeof(uint64)) : nullptr),
             context({(uint64) &threadWrapper,
                      stack != nullptr ? (uint64) &stack[STACK_SIZE] : 0
                     }),

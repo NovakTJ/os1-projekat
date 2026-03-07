@@ -12,7 +12,7 @@
 #endif
 
 
-    void* __mem_alloc(size_t size);
+    void* __mem_alloc(size_t size); //size in BYTES
 
     int __mem_free(void* ptr);
         size_t __mem_get_free_space();
