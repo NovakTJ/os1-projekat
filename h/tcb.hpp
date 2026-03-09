@@ -42,6 +42,8 @@ public:
 
     static int createNonPreemptive(TCB ** handle, BodyWithArg body, void* arg);
 
+    static int createKernelThread(TCB ** handle, BodyWithArg body, void* arg);
+
     static TCB *running;
 
     static void OThreadBody(void* arg);
@@ -98,6 +100,7 @@ private:
 
     static void nonPreemptiveWrapper();
 
+    static void kernelThreadWrapper();
 
     static uint64 timeSliceCounter;
 

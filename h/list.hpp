@@ -26,6 +26,8 @@ private:
 public:
     List() : head(0), tail(0) {}
 
+    bool empty() const { return head == 0; }
+
     List(const List<T> &) = delete;
 
     List<T> &operator=(const List<T> &) = delete;

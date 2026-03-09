@@ -1,42 +1,47 @@
 #include "../h/semaphore.hpp"
 #include "../h/tcb.hpp"
+#include "../h/scheduler.hpp"
 
-_sem::_sem(unsigned init) : value((int)init), blockedQueue() {
-    // TODO: implement
+_sem::_sem(unsigned init) : works(true), value((int)init), blockedQueue() {
 }
 
 _sem::~_sem() {
-    while (!blockedQueue.empty())
-    {
-        //TODO: many context switches will happen here!
+    // Semaphore is being closed - unblock all waiting threads
+    // They will get a return value of -1 (error) from wait()
+    works = false;
+    while (!blockedQueue.empty()) {
+        TCB* t = blockedQueue.removeFirst();
+        Scheduler::put(t);
     }
 }
 
 int _sem::open(_sem** handle, unsigned init) {
-    // TODO: implement
+    *handle = new _sem(init);
+    if (*handle == nullptr) return -1;
     return 0;
 }
 
 int _sem::close(_sem* handle) {
-    // TODO: implement
+    if (handle == nullptr) return -1;
+    delete handle;
     return 0;
 }
-int _sem::putIntoQueue()
-{
+
+int _sem::putIntoQueue() {
     TCB *old = TCB::running;
-    blockedQueue.put(old);
+    blockedQueue.addLast(old);
     TCB *next = Scheduler::get();
     if (next != nullptr) {
         TCB::running = next;
         TCB::contextSwitch(&old->context, &TCB::running->context);
     }
-    // else: queue empty, keep running current thread
+    return 0;
 }
+
 int _sem::wait() {
-    //no need for sync, no interrupts here
-    value-=1;
-    if (value<0)
-    {
+    // No need for sync, interrupts are disabled here (inside syscall handler)
+    value -= 1;
+    if (value < 0) {
         putIntoQueue();
     }
     if (works) return 0;
@@ -44,10 +49,9 @@ int _sem::wait() {
 }
 
 int _sem::signal() {
-    value+=1;
-    if (!blockedQueue.empty())
-    {
-        Scheduler::put(blockedQueue.get());
+    value += 1;
+    if (!blockedQueue.empty()) {
+        Scheduler::put(blockedQueue.removeFirst());
     }
     return 0;
 }

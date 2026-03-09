@@ -3,7 +3,7 @@
 //
 #include "../h/tcb.hpp"
 
-static void TCB::OThreadBody(void* arg)
+void TCB::OThreadBody(void* arg)
 {
     //no need for locks here
 

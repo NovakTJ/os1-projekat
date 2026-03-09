@@ -141,12 +141,24 @@ void Riscv::handleSupervisorTrap()
         // interrupt: yes; cause code: supervisor external interrupt (PLIC; could be keyboard)
         //console_handler();
         //append to inputbuffer, signal() to input semaphore.
+        int irq = plic_claim();
+        // if (irq == CONSOLE_IRQ) {
+        //     while (*((volatile uint64*)CONSOLE_STATUS) & CONSOLE_RX_STATUS_BIT) {
+        //         char c = *((volatile char*)CONSOLE_RX_DATA);
+        //         // TODO: put c in input buffer
+        //         // TODO: signal input semaphore
+        //         (void)c;
+        //     }
+        // }
+        plic_complete(irq);
     }
     else
     {
-        printKString("unexpected scause (prob. 2), sepc=");
+        printKString("unexpected scause=");
+        printKHexInteger(scause);
+        printKString(", sepc=");
         printKHexInteger(r_sepc());
-            printKString("\n");
+        printKString("\n");
 
     }
 }

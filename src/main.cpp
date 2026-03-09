@@ -1,8 +1,8 @@
 #include "../h/tcb.hpp"
 #include "../h/riscv.hpp"
 #include "../h/MemoryAllocator.h"
-#include "../h/oThread.h"
 extern void userMain();
+extern void altUserMain();
 extern void testHeavyMemory123();
 extern void testHeavyMemory4();
 
@@ -22,22 +22,22 @@ static void heavyMemory4Wrapper(void* arg) {
 }
 
 void finalMain(){
-    extern void runWrapper(void*);
     TCB* boot = TCB::createForCurrent();
     TCB::running = boot;
 
-    TCB::createKernelThread(&othread, runWrapper, (void*)othread);
+    // TODO: oThread (output thread) not yet implemented
+    // TCB::createKernelThread(&othread, runWrapper, (void*)othread);
 
     TCB* userThread;
     TCB::createThread(&userThread, userMainWrapper, nullptr);
 
     Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
 
-    while (!userThread->isFinished() && !oThread->isFinished()) {
+    while (!userThread->isFinished()) {
         TCB::kDispatch();
     }
 
-    delete userThread; //what the hell why delete it its on the stack
+    delete userThread;
     delete boot;
 }
 
