@@ -1,6 +1,7 @@
 #include "../h/semaphore.hpp"
 #include "../h/tcb.hpp"
 #include "../h/scheduler.hpp"
+#include "../h/riscv.hpp"
 
 _sem::_sem(unsigned init) : works(true), value((int)init), blockedQueue() {
 }
@@ -28,6 +29,7 @@ int _sem::close(_sem* handle) {
 }
 
 int _sem::putIntoQueue() {
+    auto ksstatus = Riscv::r_sstatus();
     TCB *old = TCB::running;
     blockedQueue.addLast(old);
     TCB *next = Scheduler::get();
@@ -35,6 +37,7 @@ int _sem::putIntoQueue() {
         TCB::running = next;
         TCB::contextSwitch(&old->context, &TCB::running->context);
     }
+    Riscv::w_sstatus(ksstatus);
     return 0;
 }
 
