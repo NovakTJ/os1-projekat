@@ -67,17 +67,15 @@ void Riscv::handleSupervisorTrap()
             break;
         }
         case 0x13:{
-                uint64 volatile sepc = r_sepc();
                 TCB::timeSliceCounter = 0;
                 TCB::kDispatch(); //execution stops and later continues here, in contextSwitch.S
-                w_sepc(sepc);
                 hasReturnValue = false;
                 break;
         }
-        case 0x41: // getc
-
+        case 0x41: { // getc (may block and context switch)
             syscallReturnValue = (uint64)handleGetc();
             break;
+        }
         case 0x42: // putc
             handlePutc((char)arg1);
             hasReturnValue = false;
@@ -89,15 +87,16 @@ void Riscv::handleSupervisorTrap()
             syscallReturnValue = (uint64)_sem::close((_sem*)arg1);
             break;
         case 0x23: { // sem_wait (may block and context switch)
-            uint64 volatile sepc = r_sepc();
             syscallReturnValue = (uint64)((_sem*)arg1)->wait();
-            w_sepc(sepc);
             break;
         }
         case 0x24: // sem_signal
             //TODO: may context switch too?
             syscallReturnValue = (uint64)((_sem*)arg1)->signal();
             break;
+		case 0x31: //sleep
+			putCurrentToSleep(arg1);
+
         default:
             hasReturnValue = false;
             __asm__ volatile("addi x1, x1, 0"); //noop
@@ -121,10 +120,8 @@ void Riscv::handleSupervisorTrap()
         TCB::timeSliceCounter++;
         if (TCB::timeSliceCounter >= TCB::running->getTimeSlice())
         {
-            uint64 volatile sepc = r_sepc();
             TCB::timeSliceCounter = 0;
             TCB::kDispatch();  //execution stops and later continues here, in contextSwitch.S
-            w_sepc(sepc);
         }
     }
     else if (scause == 0x8000000000000009UL)

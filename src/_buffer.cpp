@@ -16,8 +16,9 @@ _buf::_buf(bi_t _cap) : _cap(_cap)
 {
     buffer = (char*)MemoryAllocator::allocateBytes(_cap);
     mutexHead = new _sem(1);
-    mutexTail = new _sem(1); //unused
-    spaceAvailable = new _sem(_cap-1);
+    mutexTail = nullptr; //unused
+    //spaceAvailable = new _sem(_cap-1); // only needed if putBlocking is used
+    spaceAvailable = nullptr;
     itemAvailable = new _sem(0);
     head = 0;
     tail = 0;
@@ -26,28 +27,28 @@ _buf::_buf(bi_t _cap) : _cap(_cap)
 _buf::~_buf()
 {
     delete mutexHead;
-    delete mutexTail;
-    delete spaceAvailable;
+    //delete mutexTail;
+    //delete spaceAvailable; // only needed if putBlocking is used
     delete itemAvailable;
     MemoryAllocator::deallocate(buffer);
 }
 
-void _buf::putBlocking(char val)
-{
-    spaceAvailable->wait();
-    mutexTail->wait();
-    buffer[tail] = val;
-    tail = (tail + 1) % _cap;
-    mutexTail->signal();
-    itemAvailable->signal();
-}
+// NOTE: if you ever re-enable putBlocking, you must also re-enable spaceAvailable
+// (uncomment in constructor, destructor, and get()) since putBlocking relies on it.
+//void _buf::putBlocking(char val)
+//{
+//    spaceAvailable->wait();
+//    mutexTail->wait();
+//    buffer[tail] = val;
+//    tail = (tail + 1) % _cap;
+//    mutexTail->signal();
+//    itemAvailable->signal();
+//}
 void _buf::putIfNotFull(char val)
 {
-    mutexTail->wait();
-    if ((tail+1)%_cap == head) { mutexTail->signal(); return; }
+    if ((tail+1)%_cap == head) { return; }
     buffer[tail] = val;
     tail = (tail + 1) % _cap;
-    mutexTail->signal();
     itemAvailable->signal();
 
 
@@ -59,7 +60,7 @@ char _buf::get()
     char ret = buffer[head];
     head = (head + 1) % _cap;
     mutexHead->signal();
-    spaceAvailable->signal();
+    //spaceAvailable->signal(); // only needed if putBlocking is used
     return ret;
 }
 bi_t _buf::getCnt()

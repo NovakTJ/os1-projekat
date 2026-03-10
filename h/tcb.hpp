@@ -37,7 +37,8 @@ public:
     static TCB* createForCurrent();
 
     static void kDispatch();
-
+    static void putCurrentToSleep(uint64 ticks);
+    static void unsleepFirst();
     static void exit();
 
     static int createNonPreemptive(TCB ** handle, BodyWithArg body, void* arg);

@@ -20,5 +20,15 @@ public:
     static void put(TCB *ccb);
 
 };
+class SleepingQueue
+{
+private:
+    static List<TCB> sleepingThreadQueue;
 
+public:
+    static TCB *get();
+
+    static void put(TCB *ccb);
+
+};
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_SCHEDULER_HPP

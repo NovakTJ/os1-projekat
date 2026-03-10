@@ -29,6 +29,7 @@ int _sem::close(_sem* handle) {
 }
 
 int _sem::putIntoQueue() {
+    auto ksepc = Riscv::r_sepc();
     auto ksstatus = Riscv::r_sstatus();
     TCB *old = TCB::running;
     blockedQueue.addLast(old);
@@ -38,6 +39,7 @@ int _sem::putIntoQueue() {
         TCB::contextSwitch(&old->context, &TCB::running->context);
     }
     Riscv::w_sstatus(ksstatus);
+    Riscv::w_sepc(ksepc);
     return 0;
 }
 

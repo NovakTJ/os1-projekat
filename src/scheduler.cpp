@@ -15,3 +15,15 @@ void Scheduler::put(TCB *ccb)
 {
     readyThreadQueue.addLast(ccb);
 }
+
+List<TCB> SleepingQueue::sleepingThreadQueue;
+
+TCB *SleepingQueue::get()
+{
+    return sleepingThreadQueue.removeFirst();
+}
+
+void SleepingQueue::put(TCB *ccb)
+{
+    sleepingThreadQueue.addLast(ccb);
+}

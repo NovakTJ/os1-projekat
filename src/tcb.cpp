@@ -35,6 +35,7 @@ TCB* TCB::createForCurrent()
 
 void TCB::kDispatch()
 {
+    auto ksepc = Riscv::r_sepc();
     auto ksstatus = Riscv::r_sstatus();
     TCB *old = running;
     if (!old->isFinished()) { Scheduler::put(old); }
@@ -45,6 +46,28 @@ void TCB::kDispatch()
     }
     // else: queue empty, keep running current thread
     Riscv::w_sstatus(ksstatus);
+    Riscv::w_sepc(ksepc);
+}
+
+void unsleepFirst()
+{
+    Scheduler::put(SleepingQueue::get());
+}
+
+void TCB::putCurrentToSleep(uint64 ticks)
+{
+    auto ksepc = Riscv::r_sepc();
+    auto ksstatus = Riscv::r_sstatus();
+    TCB *old = running;
+    if (!old->isFinished()) { SleepingQueue::put(old, ticks); }
+    TCB *next = Scheduler::get();
+    if (next != nullptr) {
+        running = next;
+        TCB::contextSwitch(&old->context, &running->context);
+    }
+    // else: queue empty, keep running current thread
+    Riscv::w_sstatus(ksstatus);
+    Riscv::w_sepc(ksepc);
 }
 
 int TCB::createNonPreemptive(TCB ** handle, BodyWithArg body, void* arg)
