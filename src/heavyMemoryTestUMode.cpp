@@ -4,10 +4,10 @@
 
 #include "../h/tcb.hpp"
 #include "../h/workers.hpp"
-#include "../h///print.hpp"
+#include "../h/print.hpp"
 #include "../h/riscv.hpp"
 
-#include "../h/MemoryAllocator.h"
+#include "../h/MemoryAllocator.hpp"
 #include "../h/syscall_c.h"
 #include "../lib/console.h"
 

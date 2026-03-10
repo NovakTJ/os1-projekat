@@ -6,7 +6,7 @@
 #define OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_TCB_HPP
 
 #include "../lib/hw.h"
-#include "../h/MemoryAllocator.h"
+#include "../h/MemoryAllocator.hpp"
 #include "scheduler.hpp"
 
 

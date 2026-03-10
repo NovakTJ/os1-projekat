@@ -1,4 +1,4 @@
-#include"../h/MemoryAllocator.h"
+#include"../h/MemoryAllocator.hpp"
 #include"../h/print.hpp"
 #include"../h/riscv.hpp"
 

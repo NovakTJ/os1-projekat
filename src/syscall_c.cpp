@@ -1,6 +1,6 @@
 #include "../h/syscall_c.h"
 #include "../h/riscv.hpp"
-#include "../h/MemoryAllocator.h"
+#include "../h/MemoryAllocator.hpp"
 // --- Memory ---
 
 void* mem_alloc(size_t size) {

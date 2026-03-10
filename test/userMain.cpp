@@ -2,8 +2,8 @@
 
 #define LEVEL_1_IMPLEMENTED 1
 #define LEVEL_2_IMPLEMENTED 1
-#define LEVEL_3_IMPLEMENTED 0
-#define LEVEL_4_IMPLEMENTED 0
+#define LEVEL_3_IMPLEMENTED 1
+#define LEVEL_4_IMPLEMENTED 1
 
 #if LEVEL_2_IMPLEMENTED == 1
 // TEST 1 (zadatak 2, niti C API i sinhrona promena konteksta)
@@ -31,11 +31,8 @@
 #endif
 
 void userMain() {
-    // TODO: restore getc() once input buffer is implemented
-    // printString("Unesite broj testa? [1-7]\n");
-    // int test = getc() - '0';
-    // getc(); // Enter posle broja
-    int test = 7; // hardcoded for testing
+    printString("Unesite broj testa? [1-7]\n");
+    int test = getc() - '0';
 
     if ((test >= 1 && test <= 2) || test == 7) {
         if (LEVEL_2_IMPLEMENTED == 0) {

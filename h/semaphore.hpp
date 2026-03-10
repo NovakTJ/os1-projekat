@@ -2,7 +2,7 @@
 #define _SEMAPHORE_HPP_
 
 #include "../lib/hw.h"
-#include "MemoryAllocator.h"
+#include "MemoryAllocator.hpp"
 #include "list.hpp"
 
 class TCB;

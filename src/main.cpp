@@ -1,14 +1,27 @@
 #include "../h/tcb.hpp"
 #include "../h/riscv.hpp"
-#include "../h/MemoryAllocator.h"
+#include "../h/MemoryAllocator.hpp"
+#include"../h/io.h"
+#include"../h/_buffer.hpp"
+#include"../h/syscall_c.h"
 extern void userMain();
 extern void altUserMain();
 extern void testHeavyMemory123();
 extern void testHeavyMemory4();
 
+static volatile bool idleStop = false;
+volatile bool oThreadStop = false;
+
 static void userMainWrapper(void* arg) {
     (void)arg;
     userMain();
+}
+
+static void idleBody(void* arg) {
+    (void)arg;
+    while (!idleStop) {
+        thread_dispatch();
+    }
 }
 
 static void heavyMemory123Wrapper(void* arg) {
@@ -20,23 +33,37 @@ static void heavyMemory4Wrapper(void* arg) {
     (void)arg;
     testHeavyMemory4();
 }
-
 void finalMain(){
+    _buf::initBuffers();
+
     TCB* boot = TCB::createForCurrent();
     TCB::running = boot;
+	TCB* othread;
+    TCB::createKernelThread(&othread, TCB::OThreadBody, nullptr);
 
-    // TODO: oThread (output thread) not yet implemented
-    // TCB::createKernelThread(&othread, runWrapper, (void*)othread);
+    TCB* idleThread;
+    TCB::createThread(&idleThread, idleBody, nullptr);
 
     TCB* userThread;
     TCB::createThread(&userThread, userMainWrapper, nullptr);
 
+    Riscv::ms_sie(Riscv::SIE_SEIE);
     Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
 
     while (!userThread->isFinished()) {
         TCB::kDispatch();
     }
 
+    oThreadStop = true;
+    idleStop = true;
+    while (!othread->isFinished() || !idleThread->isFinished()) {
+        TCB::kDispatch();
+    }
+
+	delete _buf::ob;
+	delete _buf::ib;
+    delete othread;
+    delete idleThread;
     delete userThread;
     delete boot;
 }

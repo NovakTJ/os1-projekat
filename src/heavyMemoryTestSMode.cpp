@@ -2,12 +2,13 @@
 // Created by os on 3/4/26.
 //
 
+#include "../h/io.h"
 #include "../h/tcb.hpp"
 #include "../h/workers.hpp"
 #include "../h/print.hpp"
 #include "../h/riscv.hpp"
 
-#include "../h/MemoryAllocator.h"
+#include "../h/MemoryAllocator.hpp"
 #include "../h/syscall_c.h"
 #include "../lib/console.h"
 
@@ -71,25 +72,25 @@ void fragmentationTestWPrint() {
     printKString("  alloc ");
     for (int i = 0; i < N; i++) {
         ptrs[i] = mem_alloc(BLOCK_SZ);
-        __putc(ptrs[i] ? '+' : 'X');
+        handlePutc(ptrs[i] ? '+' : 'X');
     }
 
     printKString(" holes ");
     for (int i = 1; i < N; i += 2) {
         mem_free(ptrs[i]);
         ptrs[i] = nullptr;
-        __putc('-');
+        handlePutc('-');
     }
 
     printKString(" refill ");
     for (int i = 1; i < N; i += 2) {
         ptrs[i] = mem_alloc(BLOCK_SZ);
-        __putc(ptrs[i] ? '+' : 'X');
+        handlePutc(ptrs[i] ? '+' : 'X');
     }
 
     printKString(" cleanup ");
     for (int i = N - 1; i >= 0; i--) {
-        if (ptrs[i]) { mem_free(ptrs[i]); __putc('-'); }
+        if (ptrs[i]) { mem_free(ptrs[i]); handlePutc('-'); }
     }
     printKString(" OK\n");
 }
@@ -101,19 +102,19 @@ void treeAllocTestWPrint(int depth) {
 
     size_t size = depth * 80; // 240, 160, 80
     if (size > MemoryAllocator::totalAvailableBytes()) {
-        __putc('X');
+        handlePutc('X');
         return;
     }
 
     void* ptr = mem_alloc(size);
-    if (!ptr) { __putc('X'); return; }
-    __putc('(');
+    if (!ptr) { handlePutc('X'); return; }
+    handlePutc('(');
 
     treeAllocTestWPrint(depth - 1);
     treeAllocTestWPrint(depth - 1);
 
     mem_free(ptr);
-    __putc(')');
+    handlePutc(')');
 }
 void bigblocktestWPrint()
 {
@@ -170,11 +171,11 @@ void coalesceTestWPrint() {
     printKString("  abc allocated ");
 
     mem_free(b);
-    __putc('1');
+    handlePutc('1');
     mem_free(a);
-    __putc('2');
+    handlePutc('2');
     mem_free(c);
-    __putc('3');
+    handlePutc('3');
 
     // Everything should be coalesced; try a large alloc
     size_t bigSz = MemoryAllocator::totalAvailableBytes() / 2;

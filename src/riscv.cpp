@@ -6,11 +6,10 @@
 #include "../h/tcb.hpp"
 #include "../h/semaphore.hpp"
 #include "../lib/console.h"
-#include "../h/MemoryAllocator.h"
+#include "../h/MemoryAllocator.hpp"
 #include "../h/print.hpp"
+#include "../h/io.h"
 
-
-//TODO: ctrl replace MemoryAllocator.h with .hpp everywhere and rename the file too
 void Riscv::popSppSpie()
 {
     __asm__ volatile("csrw sepc, ra"); //???
@@ -65,6 +64,7 @@ void Riscv::handleSupervisorTrap()
             TCB::kDispatch();
             printKString("massive error: dead thread walks again\n");
             hasReturnValue = false;
+            break;
         }
         case 0x13:{
 
@@ -78,13 +78,11 @@ void Riscv::handleSupervisorTrap()
                 break;
         }
         case 0x41: // getc
-            // TODO: implement proper input buffer filled by console_handler interrupt
-            // __getc() uses xv6's console_read/sleep which is incompatible with our kernel
-            // syscallReturnValue = (uint64)__getc();
-            syscallReturnValue = 0;
+
+            syscallReturnValue = (uint64)handleGetc();
             break;
         case 0x42: // putc
-            __putc((char)arg1);
+            handlePutc((char)arg1);
             hasReturnValue = false;
             break;
         case 0x21: // sem_open
@@ -142,14 +140,12 @@ void Riscv::handleSupervisorTrap()
         //console_handler();
         //append to inputbuffer, signal() to input semaphore.
         int irq = plic_claim();
-        // if (irq == CONSOLE_IRQ) {
-        //     while (*((volatile uint64*)CONSOLE_STATUS) & CONSOLE_RX_STATUS_BIT) {
-        //         char c = *((volatile char*)CONSOLE_RX_DATA);
-        //         // TODO: put c in input buffer
-        //         // TODO: signal input semaphore
-        //         (void)c;
-        //     }
-        // }
+         if (irq == CONSOLE_IRQ) {
+             while (*((volatile uint8*)CONSOLE_STATUS) & CONSOLE_RX_STATUS_BIT) {
+                 char c = *((volatile char*)CONSOLE_RX_DATA);
+                 putIntoInputBuffer(c);
+             }
+         }
         plic_complete(irq);
     }
     else

@@ -3,6 +3,7 @@
 //
 
 #include "../h/print.hpp"
+#include "../h/io.h"
 #include "../h/riscv.hpp"
 #include "../h/syscall_c.h"
 #include "../lib/console.h"
@@ -13,7 +14,7 @@ void printKString(char const *string)
     Riscv::mc_sstatus(Riscv::SSTATUS_SIE);
     while (*string != '\0')
     {
-        __putc(*string);
+        handlePutc(*string);
         string++;
     }
     Riscv::ms_sstatus(sstatus & Riscv::SSTATUS_SIE ? Riscv::SSTATUS_SIE : 0);
@@ -46,7 +47,7 @@ void printKInteger(uint64 integer)
     if (neg)
         buf[i++] = '-';
 
-    while (--i >= 0) { __putc(buf[i]); }
+    while (--i >= 0) { handlePutc(buf[i]); }
     Riscv::ms_sstatus(sstatus & Riscv::SSTATUS_SIE ? Riscv::SSTATUS_SIE : 0);
 }
 
@@ -60,9 +61,9 @@ void printKHexInteger(uint64 integer)
 
     if (integer == 0)
     {
-        __putc('0');
-        __putc('x');
-        __putc('0');
+        handlePutc('0');
+        handlePutc('x');
+        handlePutc('0');
         Riscv::ms_sstatus(sstatus & Riscv::SSTATUS_SIE ? Riscv::SSTATUS_SIE : 0);
         return;
     }
@@ -73,9 +74,9 @@ void printKHexInteger(uint64 integer)
         buf[i++] = digits[x & 0xf];
     } while ((x >>= 4) != 0);
 
-    __putc('0');
-    __putc('x');
-    while (--i >= 0) { __putc(buf[i]); }
+    handlePutc('0');
+    handlePutc('x');
+    while (--i >= 0) { handlePutc(buf[i]); }
     Riscv::ms_sstatus(sstatus & Riscv::SSTATUS_SIE ? Riscv::SSTATUS_SIE : 0);
 }
 

@@ -35,6 +35,7 @@ TCB* TCB::createForCurrent()
 
 void TCB::kDispatch()
 {
+    auto ksstatus = Riscv::r_sstatus();
     TCB *old = running;
     if (!old->isFinished()) { Scheduler::put(old); }
     TCB *next = Scheduler::get();
@@ -43,6 +44,7 @@ void TCB::kDispatch()
         TCB::contextSwitch(&old->context, &running->context);
     }
     // else: queue empty, keep running current thread
+    Riscv::w_sstatus(ksstatus);
 }
 
 int TCB::createNonPreemptive(TCB ** handle, BodyWithArg body, void* arg)
