@@ -24,11 +24,12 @@ class SleepingQueue
 {
 private:
     static List<TCB> sleepingThreadQueue;
-
+    static int totalTime = 0;
 public:
+    static decrement();
     static TCB *get();
 
-    static void put(TCB *ccb);
+    static void put(TCB *ccb, int ticks);
 
 };
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_SCHEDULER_HPP

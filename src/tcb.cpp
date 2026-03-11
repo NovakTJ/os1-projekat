@@ -54,7 +54,7 @@ void unsleepFirst()
     Scheduler::put(SleepingQueue::get());
 }
 
-void TCB::putCurrentToSleep(uint64 ticks)
+int TCB::putCurrentToSleep(uint64 ticks)
 {
     auto ksepc = Riscv::r_sepc();
     auto ksstatus = Riscv::r_sstatus();
@@ -68,6 +68,7 @@ void TCB::putCurrentToSleep(uint64 ticks)
     // else: queue empty, keep running current thread
     Riscv::w_sstatus(ksstatus);
     Riscv::w_sepc(ksepc);
+    return 0;
 }
 
 int TCB::createNonPreemptive(TCB ** handle, BodyWithArg body, void* arg)

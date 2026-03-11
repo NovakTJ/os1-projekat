@@ -1,0 +1,7 @@
+TODO: treba da zapamtim kako se (da napravim da se javni testovi kompajliraju i izvrsavaju) radi za odbranu.
+TODO: implementiraj semafor kao i syscallove. vrv vec ima implementacija u javnim. nadji i zavrsi.
+
+TODO: nek ti prodju javni za bounded buffer i sl.
+TODO: kad prodju javni za semafor, implementiraj konzolu.
+
+3 postena dana rada. projekat gotov 9.3. najjaceeee

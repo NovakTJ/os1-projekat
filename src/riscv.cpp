@@ -91,11 +91,11 @@ void Riscv::handleSupervisorTrap()
             break;
         }
         case 0x24: // sem_signal
-            //TODO: may context switch too?
             syscallReturnValue = (uint64)((_sem*)arg1)->signal();
             break;
 		case 0x31: //sleep
-			putCurrentToSleep(arg1);
+			syscallReturnValue = TCB::putCurrentToSleep(arg1);
+			break;
 
         default:
             hasReturnValue = false;

@@ -37,7 +37,7 @@ public:
     static TCB* createForCurrent();
 
     static void kDispatch();
-    static void putCurrentToSleep(uint64 ticks);
+    static int putCurrentToSleep(uint64 ticks);
     static void unsleepFirst();
     static void exit();
 
@@ -46,7 +46,8 @@ public:
     static int createKernelThread(TCB ** handle, BodyWithArg body, void* arg);
 
     static TCB *running;
-
+    void decrement();
+    void setTimeUntilUnsleep(int ticks);
     static void OThreadBody(void* arg);
 
 private:
@@ -59,7 +60,8 @@ private:
                      stack != nullptr ? (uint64) &stack[STACK_SIZE] : 0
                     }),
             timeSlice(timeSlice),
-            finished(false)
+            finished(false),
+            timeUntilUnsleep(0)
     {
         if (body != nullptr) { Scheduler::put(this); }
     }
@@ -73,7 +75,8 @@ private:
                      stack_space != nullptr ? (uint64) stack_space : 0
                     }),
             timeSlice(timeSlice),
-            finished(false)
+            finished(false),
+            timeUntilUnsleep(0)
     {
         if (body != nullptr) { Scheduler::put(this); }
     }
@@ -83,6 +86,7 @@ private:
     BodyWithArg body;
     void* arg;
     uint64 *stack;
+    int timeUntilUnsleep
 public:
     struct Context //the rest of the context is kept on the stack
     {
