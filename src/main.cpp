@@ -14,6 +14,14 @@ volatile bool oThreadStop = false;
 
 static void userMainWrapper(void* arg) {
     (void)arg;
+
+    // Quick getc test
+    for (int i = 0; i < 3; i++) {
+        char c = getc();
+        putc(c);
+    }
+    putc('\n');
+
     userMain();
 }
 

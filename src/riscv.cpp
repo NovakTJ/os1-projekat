@@ -145,6 +145,10 @@ void Riscv::handleSupervisorTrap()
         printKHexInteger(scause);
         printKString(", sepc=");
         printKHexInteger(r_sepc());
+        printKString(", stval=");
+        printKHexInteger(r_stval());
+        printKString(", sstatus=");
+        printKHexInteger(r_sstatus());
         printKString("\n");
 
     }

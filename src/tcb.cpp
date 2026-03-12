@@ -105,5 +105,6 @@ void TCB::nonPreemptiveWrapper()
 void TCB::kernelThreadWrapper()
 {
     running->body(running->arg);
-    thread_exit();
+    TCB::running->setFinished(true);
+    TCB::kDispatch();
 }
