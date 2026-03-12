@@ -24,9 +24,8 @@ class SleepingQueue
 {
 private:
     static List<TCB> sleepingThreadQueue;
-    static int totalTime = 0;
 public:
-    static decrement();
+    static void decrement();
     static TCB *get();
 
     static void put(TCB *ccb, int ticks);

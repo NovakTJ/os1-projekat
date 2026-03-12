@@ -71,6 +71,27 @@ public:
         return head->data;
     }
 
+    T *peekAt(int index)
+    {
+        Elem *curr = head;
+        for (int i = 0; i < index && curr; i++) curr = curr->next;
+        return curr ? curr->data : 0;
+    }
+
+    void insertAt(int pos, T *data)
+    {
+        if (pos <= 0 || !head)
+        {
+            addFirst(data);
+            return;
+        }
+        Elem *curr = head;
+        for (int i = 0; i < pos - 1 && curr->next; i++) curr = curr->next;
+        Elem *elem = new Elem(data, curr->next);
+        curr->next = elem;
+        if (curr == tail) tail = elem;
+    }
+
     T *removeLast()
     {
         if (!head) { return 0; }

@@ -31,7 +31,6 @@ public:
 
     _buf(bi_t _cap);
     virtual ~_buf();
-    void virtual putBlocking(char val);
     void virtual putIfNotFull(char val); //nonblocking!
     char virtual get();
     bi_t getCnt();

@@ -117,6 +117,7 @@ void Riscv::handleSupervisorTrap()
     {
         // interrupt: yes; cause code: supervisor software interrupt (CLINT; machine timer interrupt)
         mc_sip(SIP_SSIP);
+        SleepingQueue::decrement();
         TCB::timeSliceCounter++;
         if (TCB::timeSliceCounter >= TCB::running->getTimeSlice())
         {

@@ -35,8 +35,8 @@ TCB* TCB::createForCurrent()
 
 void TCB::kDispatch()
 {
-    auto ksepc = Riscv::r_sepc();
-    auto ksstatus = Riscv::r_sstatus();
+    auto volatile ksepc = Riscv::r_sepc();
+    auto volatile ksstatus = Riscv::r_sstatus();
     TCB *old = running;
     if (!old->isFinished()) { Scheduler::put(old); }
     TCB *next = Scheduler::get();
@@ -56,8 +56,8 @@ void unsleepFirst()
 
 int TCB::putCurrentToSleep(uint64 ticks)
 {
-    auto ksepc = Riscv::r_sepc();
-    auto ksstatus = Riscv::r_sstatus();
+    auto volatile ksepc = Riscv::r_sepc();
+    auto volatile ksstatus = Riscv::r_sstatus();
     TCB *old = running;
     if (!old->isFinished()) { SleepingQueue::put(old, ticks); }
     TCB *next = Scheduler::get();

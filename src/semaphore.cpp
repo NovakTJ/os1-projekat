@@ -29,8 +29,8 @@ int _sem::close(_sem* handle) {
 }
 
 int _sem::putIntoQueue() {
-    auto ksepc = Riscv::r_sepc();
-    auto ksstatus = Riscv::r_sstatus();
+    auto volatile ksepc = Riscv::r_sepc();
+    auto volatile ksstatus = Riscv::r_sstatus();
     TCB *old = TCB::running;
     blockedQueue.addLast(old);
     TCB *next = Scheduler::get();

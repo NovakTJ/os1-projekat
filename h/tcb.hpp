@@ -46,8 +46,8 @@ public:
     static int createKernelThread(TCB ** handle, BodyWithArg body, void* arg);
 
     static TCB *running;
-    void decrement();
-    void setTimeUntilUnsleep(int ticks);
+    int getTimeUntilUnsleep() const { return timeUntilUnsleep; }
+    void setTimeUntilUnsleep(int ticks) { timeUntilUnsleep = ticks; }
     static void OThreadBody(void* arg);
 
 private:
@@ -86,7 +86,6 @@ private:
     BodyWithArg body;
     void* arg;
     uint64 *stack;
-    int timeUntilUnsleep
 public:
     struct Context //the rest of the context is kept on the stack
     {
@@ -98,6 +97,7 @@ public:
 private:
     uint64 timeSlice;
     bool finished;
+    int timeUntilUnsleep;
 
     friend class Riscv;
 

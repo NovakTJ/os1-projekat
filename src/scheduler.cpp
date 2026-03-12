@@ -3,6 +3,7 @@
 //
 
 #include "../h/scheduler.hpp"
+#include "../h/tcb.hpp"
 
 List<TCB> Scheduler::readyThreadQueue;
 
@@ -25,18 +26,39 @@ TCB *SleepingQueue::get()
 
 void SleepingQueue::put(TCB *ccb, int ticks)
 {
-    sleepingThreadQueue.addLast(ccb);
+    int remaining = ticks;
+    int pos = 0;
+    TCB *curr = sleepingThreadQueue.peekAt(pos);
+
+    // Walk the list, subtracting each node's relative delta
+    while (curr)
+    {
+        if (remaining < curr->getTimeUntilUnsleep())
+        {
+            // Insert before this node; adjust this node's delta
+            curr->setTimeUntilUnsleep(curr->getTimeUntilUnsleep() - remaining);
+            break;
+        }
+        remaining -= curr->getTimeUntilUnsleep();
+        pos++;
+        curr = sleepingThreadQueue.peekAt(pos);
+    }
+
+    ccb->setTimeUntilUnsleep(remaining);
+    sleepingThreadQueue.insertAt(pos, ccb);
 }
 
-void SleepingQueue::decrement(){
-if(totalTime==0) return;
-totalTime--;
-int left = 0;
-while(!left){
-if(!sleepingThreadQueue.peekFirst()) return; //no threads
-left = sleepingThreadQueue.peekFirst()->decrement();
-	if(!left){
-unsleepFirst();
-}
-}
+void SleepingQueue::decrement()
+{
+    TCB *first = sleepingThreadQueue.peekFirst();
+    if (!first) return;
+
+    first->setTimeUntilUnsleep(first->getTimeUntilUnsleep() - 1);
+
+    // Wake all threads whose time has come (delta == 0)
+    while (sleepingThreadQueue.peekFirst() &&
+           sleepingThreadQueue.peekFirst()->getTimeUntilUnsleep() <= 0)
+    {
+        Scheduler::put(sleepingThreadQueue.removeFirst());
+    }
 }
