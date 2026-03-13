@@ -117,6 +117,14 @@ public:
         if (!tail) { return 0; }
         return tail->data;
     }
+
+    void printListOfTCBs()
+    {
+        for (Elem *curr = head; curr; curr = curr->next)
+        {
+            curr->data->printTCB();
+        }
+    }
 };
 
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_LIST_HPP

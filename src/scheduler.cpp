@@ -4,6 +4,7 @@
 
 #include "../h/scheduler.hpp"
 #include "../h/tcb.hpp"
+#include "../h/print.hpp"
 
 List<TCB> Scheduler::readyThreadQueue;
 
@@ -16,6 +17,13 @@ void Scheduler::put(TCB *ccb)
 {
     ccb->setCurrentQueue(1);
     readyThreadQueue.addLast(ccb);
+}
+
+void Scheduler::print()
+{
+    printKString("--- Scheduler Ready Queue ---\n");
+    readyThreadQueue.printListOfTCBs();
+    printKString("-----------------------------\n");
 }
 
 List<TCB> SleepingQueue::sleepingThreadQueue;
@@ -63,4 +71,11 @@ void SleepingQueue::decrement()
     {
         Scheduler::put(sleepingThreadQueue.removeFirst());
     }
+}
+
+void SleepingQueue::print()
+{
+    printKString("--- Sleeping Queue ---\n");
+    sleepingThreadQueue.printListOfTCBs();
+    printKString("----------------------\n");
 }

@@ -2,8 +2,17 @@
 #include "../h/tcb.hpp"
 #include "../h/scheduler.hpp"
 #include "../h/riscv.hpp"
+#include "../h/print.hpp"
+
+_sem* _sem::allSems[MAX_SEMS] = {nullptr};
 
 _sem::_sem(unsigned init) : works(true), value((int)init), blockedQueue() {
+    for (int i = 0; i < MAX_SEMS; i++) {
+        if (allSems[i] == nullptr) {
+            allSems[i] = this;
+            break;
+        }
+    }
 }
 
 _sem::~_sem() {
@@ -11,8 +20,13 @@ _sem::~_sem() {
     // They will get a return value of -1 (error) from wait()
     works = false;
     while (!blockedQueue.empty()) {
-        TCB* t = blockedQueue.removeFirst();
-        Scheduler::put(t);
+        Scheduler::put(blockedQueue.get());
+    }
+    for (int i = 0; i < MAX_SEMS; i++) {
+        if (allSems[i] == this) {
+            allSems[i] = nullptr;
+            break;
+        }
     }
 }
 
@@ -32,8 +46,7 @@ int _sem::putIntoQueue() {
     auto volatile ksepc = Riscv::r_sepc();
     auto volatile ksstatus = Riscv::r_sstatus();
     TCB *old = TCB::running;
-    old->setCurrentQueue(3);
-    blockedQueue.addLast(old);
+    blockedQueue.put(old);
     TCB *next = Scheduler::get();
     if (next != nullptr) {
         TCB::running = next;
@@ -56,10 +69,36 @@ int _sem::wait() {
     else return -1;
 }
 
+void _sem::print() {
+    printKString("Sem @");
+    printKHexInteger((uint64)this);
+    printKString(" val=");
+    printKInteger(value);
+    printKString("\n");
+    blockedQueue.print();
+}
+
+void _sem::printAll() {
+    printKString("=== All Semaphores ===\n");
+    int count = 0;
+    for (int i = 0; i < MAX_SEMS; i++) {
+        if (allSems[i] != nullptr) {
+            printKString("[");
+            printKInteger(i);
+            printKString("] ");
+            allSems[i]->print();
+            count++;
+        }
+    }
+    printKString("Total: ");
+    printKInteger(count);
+    printKString("\n");
+}
+
 int _sem::signal() {
     value += 1;
     if (!blockedQueue.empty()) {
-        Scheduler::put(blockedQueue.removeFirst());
+        Scheduler::put(blockedQueue.get());
     }
     return 0;
 }

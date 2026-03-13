@@ -3,7 +3,7 @@
 
 #include "../lib/hw.h"
 #include "MemoryAllocator.hpp"
-#include "list.hpp"
+#include "blockedQueue.hpp"
 
 class TCB;
 
@@ -20,13 +20,18 @@ public:
 
     int wait();
     int signal();
+    void print();
+    static void printAll();
 
 private:
     int putIntoQueue();
 
     bool works;
     int value;
-    List<TCB> blockedQueue;
+    BlockedQueue blockedQueue;
+
+    static const int MAX_SEMS = 256;
+    static _sem* allSems[MAX_SEMS];
 };
 
 #endif // _SEMAPHORE_HPP_

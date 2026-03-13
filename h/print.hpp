@@ -12,6 +12,8 @@ extern void printKString(char const *string);
 extern void printKInteger(uint64 integer);
 extern void printKHexInteger(uint64 integer);
 
+extern void printAllThreads();
+
 // User-mode (calls putc syscall)
 // TODO: add mutex/semaphore protection once semaphores are working
 extern void printUString(char const *string);

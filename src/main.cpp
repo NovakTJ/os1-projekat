@@ -4,6 +4,7 @@
 #include"../h/io.h"
 #include"../h/_buffer.hpp"
 #include"../h/syscall_c.h"
+#include"../h/print.hpp"
 extern void userMain();
 extern void altUserMain();
 extern void testHeavyMemory123();
@@ -11,6 +12,7 @@ extern void testHeavyMemory4();
 
 static volatile bool idleStop = false;
 volatile bool oThreadStop = false;
+int debugMode = 0;
 
 static void userMainWrapper(void* arg) {
     (void)arg;
@@ -27,15 +29,6 @@ static void idleBody(void* arg) {
     }
 }
 
-static void heavyMemory123Wrapper(void* arg) {
-    (void)arg;
-    testHeavyMemory123();
-}
-
-static void heavyMemory4Wrapper(void* arg) {
-    (void)arg;
-    testHeavyMemory4();
-}
 void finalMain(){
     _buf::initBuffers();
 
@@ -52,7 +45,17 @@ void finalMain(){
 
     Riscv::ms_sie(Riscv::SIE_SEIE);
     Riscv::ms_sstatus(Riscv::SSTATUS_SIE);
-
+	if(debugMode){
+		printKHexInteger((uint64)boot);
+		printKString(" is boot\n");
+		printKHexInteger((uint64)othread);
+		printKString(" is othread\n");
+		printKHexInteger((uint64)idleThread);
+		printKString(" is idleThread\n");
+		printKHexInteger((uint64)userThread);
+		printKString(" is userThread\n");
+    	printAllThreads();
+	}
     while (!userThread->isFinished()) {
         TCB::kDispatch();
     }
@@ -71,30 +74,6 @@ void finalMain(){
     delete boot;
 }
 
-void nonPreemptiveTestMain(){
-    TCB* boot = TCB::createForCurrent();
-    TCB::running = boot;
-
-    // Run tests 1-3 together
-    TCB* test123;
-    TCB::createNonPreemptive(&test123, heavyMemory123Wrapper, nullptr);
-
-    while (!test123->isFinished()) {
-        TCB::kDispatch();
-    }
-    delete test123;
-
-    // Run test 4 separately (uses all memory, doesn't work after 1-3)
-    TCB* test4;
-    TCB::createNonPreemptive(&test4, heavyMemory4Wrapper, nullptr);
-
-    while (!test4->isFinished()) {
-        TCB::kDispatch();
-    }
-    delete test4;
-
-    delete boot;
-}
 
 int main()
 {

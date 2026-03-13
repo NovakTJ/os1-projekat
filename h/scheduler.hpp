@@ -19,6 +19,7 @@ public:
 
     static void put(TCB *ccb);
 
+    static void print();
 };
 class SleepingQueue
 {
@@ -30,5 +31,6 @@ public:
 
     static void put(TCB *ccb, int ticks);
 
+    static void print();
 };
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_SCHEDULER_HPP

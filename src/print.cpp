@@ -6,6 +6,8 @@
 #include "../h/io.h"
 #include "../h/riscv.hpp"
 #include "../h/syscall_c.h"
+#include "../h/scheduler.hpp"
+#include "../h/semaphore.hpp"
 #include "../lib/console.h"
 
 void printKString(char const *string)
@@ -143,4 +145,11 @@ void printUHexInteger(uint64 integer)
     putc('0');
     putc('x');
     while (--i >= 0) { putc(buf[i]); }
+}
+
+void printAllThreads()
+{
+    _sem::printAll();
+    Scheduler::print();
+    SleepingQueue::print();
 }
