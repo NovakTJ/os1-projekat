@@ -8,7 +8,7 @@ _buf* _buf::ob = nullptr;
 _buf* _buf::ib = nullptr;
 
 void _buf::initBuffers() {
-    ob = new _buf(256);
+    ob = new _buf(4096);
     ib = new _buf(256);
 }
 

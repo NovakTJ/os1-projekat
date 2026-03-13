@@ -33,10 +33,10 @@ void TCB::OThreadBody(void* arg)
         }
         if (oThreadStop && !_buf::ob->getCnt()) break;
 
-        while (!(*((volatile uint8*)CONSOLE_STATUS) & CONSOLE_TX_STATUS_BIT))  kDispatch();
+        while (!(*((volatile uint8*)CONSOLE_STATUS) & CONSOLE_TX_STATUS_BIT));
 
         char tosend = _buf::ob->get();
-        while (!(*((volatile uint8*)CONSOLE_STATUS) & CONSOLE_TX_STATUS_BIT))  kDispatch();
+        while (!(*((volatile uint8*)CONSOLE_STATUS) & CONSOLE_TX_STATUS_BIT));
         *((volatile char*)CONSOLE_TX_DATA) = tosend;
     }
 }

@@ -14,6 +14,7 @@ TCB *Scheduler::get()
 
 void Scheduler::put(TCB *ccb)
 {
+    ccb->setCurrentQueue(1);
     readyThreadQueue.addLast(ccb);
 }
 
@@ -45,6 +46,7 @@ void SleepingQueue::put(TCB *ccb, int ticks)
     }
 
     ccb->setTimeUntilUnsleep(remaining);
+    ccb->setCurrentQueue(2);
     sleepingThreadQueue.insertAt(pos, ccb);
 }
 

@@ -5,6 +5,7 @@
 #include "../h/tcb.hpp"
 #include "../h/riscv.hpp"
 #include "../h/syscall_c.h"
+#include "../h/print.hpp"
 
 TCB *TCB::running = nullptr;
 
@@ -111,4 +112,27 @@ void TCB::kernelThreadWrapper()
     running->body(running->arg);
     TCB::running->setFinished(true);
     TCB::kDispatch();
+}
+
+void TCB::printTCB()
+{
+    printKString("TCB @");
+    printKHexInteger((uint64)this);
+    printKString(" body=");
+    printKHexInteger((uint64)body);
+    printKString(" stack=");
+    printKHexInteger((uint64)stack);
+    printKString(" ra=");
+    printKHexInteger(context.ra);
+    printKString(" sp=");
+    printKHexInteger(context.sp);
+    printKString(" ts=");
+    printKInteger(timeSlice);
+    printKString(" fin=");
+    printKInteger(finished);
+    printKString(" sleep=");
+    printKInteger(timeUntilUnsleep);
+    printKString(" q=");
+    printKInteger(currentQueue);
+    printKString("\n");
 }

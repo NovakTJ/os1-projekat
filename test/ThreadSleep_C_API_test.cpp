@@ -18,13 +18,13 @@ static void sleepyRun(void *arg) {
 }
 
 void testSleeping() {
-    const int sleepy_thread_count = 2;
-    time_t sleep_times[sleepy_thread_count] = {10, 20};
+    const int sleepy_thread_count = 4;
+    time_t sleep_times[sleepy_thread_count] = {10, 20, 30, 40};
     thread_t sleepyThread[sleepy_thread_count];
 
     for (int i = 0; i < sleepy_thread_count; i++) {
         thread_create(&sleepyThread[i], sleepyRun, sleep_times + i);
     }
 
-    while (!(finished[0] && finished[1])) {}
+    while (!(finished[0] && finished[1] && finished[2] && finished[3])) {}
 }

@@ -84,6 +84,9 @@ public:
     static TCB *running;
     int getTimeUntilUnsleep() const { return timeUntilUnsleep; }
     void setTimeUntilUnsleep(int ticks) { timeUntilUnsleep = ticks; }
+    int getCurrentQueue() const { return currentQueue; }
+    void setCurrentQueue(int q) { currentQueue = q; }
+    void printTCB();
     static void OThreadBody(void* arg);
 
 private:
@@ -97,7 +100,8 @@ private:
                     }),
             timeSlice(timeSlice),
             finished(false),
-            timeUntilUnsleep(0)
+            timeUntilUnsleep(0),
+            currentQueue(0)
     {
         if (body != nullptr) { Scheduler::put(this); }
     }
@@ -112,7 +116,8 @@ private:
                     }),
             timeSlice(timeSlice),
             finished(false),
-            timeUntilUnsleep(0)
+            timeUntilUnsleep(0),
+            currentQueue(0)
     {
         if (body != nullptr) { Scheduler::put(this); }
     }
@@ -134,6 +139,7 @@ private:
     uint64 timeSlice;
     bool finished;
     int timeUntilUnsleep;
+    int currentQueue;
 
     friend class Riscv;
 
