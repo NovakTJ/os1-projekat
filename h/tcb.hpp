@@ -63,7 +63,12 @@ private:
             finished(false),
             timeUntilUnsleep(0)
     {
-        if (body != nullptr) { Scheduler::put(this); }
+        if (body != nullptr) {
+            uint64* top = &stack[STACK_SIZE];
+            for (int i = 1; i <= INNER_CS_REGISTER_COUNT; i++) top[-i] = 0;
+            context.sp = (uint64)(top) - INNER_CS_REGISTER_COUNT * 8;
+            Scheduler::put(this);
+        }
     }
 
     // ABI constructor: uses pre-allocated stack (does NOT own it)
@@ -78,7 +83,12 @@ private:
             finished(false),
             timeUntilUnsleep(0)
     {
-        if (body != nullptr) { Scheduler::put(this); }
+        if (body != nullptr) {
+            uint64* top = (uint64*)stack_space;
+            for (int i = 1; i <= INNER_CS_REGISTER_COUNT; i++) top[-i] = 0;
+            context.sp = (uint64)(top) - INNER_CS_REGISTER_COUNT * 8;
+            Scheduler::put(this);
+        }
     }
 
 
@@ -111,6 +121,7 @@ private:
 
     static uint64 constexpr STACK_SIZE = 1024;
     static uint64 constexpr TIME_SLICE = 2;
+    static uint64 constexpr INNER_CS_REGISTER_COUNT = 12; // s0-s11
 };
 
 #endif //OS1_VEZBE07_RISCV_CONTEXT_SWITCH_2_INTERRUPT_TCB_HPP
