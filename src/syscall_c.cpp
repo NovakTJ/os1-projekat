@@ -1,7 +1,6 @@
 #include "../h/syscall_c.h"
 #include "../h/riscv.hpp"
 #include "../h/MemoryAllocator.hpp"
-// --- Memory ---
 
 void* mem_alloc(size_t size) {
     size_t blocks = MemoryAllocator::neededBlocks(size);
@@ -20,10 +19,8 @@ size_t mem_get_largest_free_block() {
     return (size_t)Riscv::ecall(0x04);
 }
 
-// --- Thread ---
-
 int thread_create(thread_t* handle, void(*start_routine)(void*), void* arg) {
-    // Allocate stack via mem_alloc, then pass last byte to ABI
+    // Allocate stack via mem_alloc, then pass **last byte** to ABI
     void* stack_mem = mem_alloc(DEFAULT_STACK_SIZE);
     if (!stack_mem && start_routine != nullptr) return -1;
     void* stack_top = start_routine != nullptr ? (void*)((uint64)stack_mem + DEFAULT_STACK_SIZE) : nullptr;
@@ -38,13 +35,9 @@ void thread_dispatch() {
     Riscv::ecall(0x13);
 }
 
-// --- Time ---
-
 int time_sleep(time_t t) {
     return (int)Riscv::ecall(0x31, (uint64)t);
 }
-
-// --- Console ---
 
 char getc() {
     return (char)Riscv::ecall(0x41);
@@ -53,8 +46,6 @@ char getc() {
 void putc(char c) {
     Riscv::ecall(0x42, (uint64)c);
 }
-
-// --- Semaphore ---
 
 int sem_open(sem_t* handle, unsigned init) {
     return (int)Riscv::ecall(0x21, (uint64)handle, (uint64)init);

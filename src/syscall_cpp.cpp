@@ -1,7 +1,5 @@
 #include "../h/syscall_cpp.hpp"
 
-// --- Thread ---
-
 Thread::Thread(void (*body)(void*), void* arg)
     : myHandle(nullptr), body(body), arg(arg) {}
 
@@ -27,8 +25,6 @@ int Thread::sleep(time_t t) {
     return time_sleep(t);
 }
 
-// --- Console ---
-
 char Console::getc() {
     return ::getc();
 }
@@ -36,8 +32,6 @@ char Console::getc() {
 void Console::putc(char c) {
     ::putc(c);
 }
-
-// --- Semaphore ---
 
 Semaphore::Semaphore(unsigned init) : myHandle(nullptr) {
     sem_open(&myHandle, init);

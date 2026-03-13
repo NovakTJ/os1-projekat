@@ -82,8 +82,6 @@ void printKHexInteger(uint64 integer)
     Riscv::ms_sstatus(sstatus & Riscv::SSTATUS_SIE ? Riscv::SSTATUS_SIE : 0);
 }
 
-// --- User-mode print functions (use putc syscall) ---
-// TODO: wrap in semaphore/mutex for thread safety once available
 
 void printUString(char const *string)
 {
