@@ -9,6 +9,42 @@
 #include "../h/MemoryAllocator.hpp"
 #include "scheduler.hpp"
 
+inline void pushCalleeSaved() {
+    __asm__ volatile(
+        "addi sp, sp, -96\n"
+        "sd s0,  0*8(sp)\n"
+        "sd s1,  1*8(sp)\n"
+        "sd s2,  2*8(sp)\n"
+        "sd s3,  3*8(sp)\n"
+        "sd s4,  4*8(sp)\n"
+        "sd s5,  5*8(sp)\n"
+        "sd s6,  6*8(sp)\n"
+        "sd s7,  7*8(sp)\n"
+        "sd s8,  8*8(sp)\n"
+        "sd s9,  9*8(sp)\n"
+        "sd s10, 10*8(sp)\n"
+        "sd s11, 11*8(sp)\n"
+    );
+}
+
+inline void popCalleeSaved() {
+    __asm__ volatile(
+        "ld s0,  0*8(sp)\n"
+        "ld s1,  1*8(sp)\n"
+        "ld s2,  2*8(sp)\n"
+        "ld s3,  3*8(sp)\n"
+        "ld s4,  4*8(sp)\n"
+        "ld s5,  5*8(sp)\n"
+        "ld s6,  6*8(sp)\n"
+        "ld s7,  7*8(sp)\n"
+        "ld s8,  8*8(sp)\n"
+        "ld s9,  9*8(sp)\n"
+        "ld s10, 10*8(sp)\n"
+        "ld s11, 11*8(sp)\n"
+        "addi sp, sp, 96\n"
+    );
+}
+
 
 // Thread Control Block
 class TCB

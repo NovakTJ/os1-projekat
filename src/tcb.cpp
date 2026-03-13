@@ -42,7 +42,9 @@ void TCB::kDispatch()
     TCB *next = Scheduler::get();
     if (next != nullptr) {
         running = next;
+        pushCalleeSaved();
         TCB::contextSwitch(&old->context, &running->context);
+        popCalleeSaved();
     }
     // else: queue empty, keep running current thread
     Riscv::w_sstatus(ksstatus);
@@ -63,7 +65,9 @@ int TCB::putCurrentToSleep(uint64 ticks)
     TCB *next = Scheduler::get();
     if (next != nullptr) {
         running = next;
+        pushCalleeSaved();
         TCB::contextSwitch(&old->context, &running->context);
+        popCalleeSaved();
     }
     // else: queue empty, keep running current thread
     Riscv::w_sstatus(ksstatus);

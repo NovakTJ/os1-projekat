@@ -36,7 +36,9 @@ int _sem::putIntoQueue() {
     TCB *next = Scheduler::get();
     if (next != nullptr) {
         TCB::running = next;
+        pushCalleeSaved();
         TCB::contextSwitch(&old->context, &TCB::running->context);
+        popCalleeSaved();
     }
     Riscv::w_sstatus(ksstatus);
     Riscv::w_sepc(ksepc);
