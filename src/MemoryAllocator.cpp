@@ -309,6 +309,8 @@ int MemoryAllocator::deallocate(char* address)
     if (!fmmd->isAllocated())
     {
         printKString("double free\n");
+        printKHexInteger((uint64)fmmd);
+        printKString("\n");
         printInfo();
         return -1;
     }
